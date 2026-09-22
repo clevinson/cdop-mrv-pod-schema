@@ -1,4 +1,5 @@
 site_name: CDOP MRV Pod
+site_url: https://clevinson.github.io/cdop-mrv-pod-schema/
 site_description: A shared reference for the CDOP MRV pod's monitoring, reporting and verification data
 docs_dir: build/docs
 site_dir: build/site
@@ -18,9 +19,9 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
   - Overview: index.md
-  - Project: schema/classes/Project.md
-  - Monitoring plan: schema/classes/MonitoringPlan.md
-  - Monitoring result: schema/classes/MonitoringResult.md
+  - Project: schema/class/Project.md
+  - Monitoring plan: schema/class/MonitoringPlan.md
+  - Monitoring result: schema/class/MonitoringResult.md
   - Downloads:
       - LinkML YAML: schema/mrv-pod.yaml
       - JSON Schema: schema/mrv-pod.schema.json

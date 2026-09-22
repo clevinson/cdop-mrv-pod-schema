@@ -1,6 +1,6 @@
-# CDOP MRV pod — one-time translation of MRV August 11.xlsx.
+# CDOP MRV pod — aligned with MRV September 22.xlsx.
 # Edit this schema going forward; the workbook is a corrected discussion snapshot.
-id: https://example.org/cdop/mrv-pod
+id: https://clevinson.github.io/cdop-mrv-pod-schema/schema/
 name: mrv_pod
 title: CDOP MRV Pod
 description: >-
@@ -12,8 +12,8 @@ description: >-
 version: 0.1.0
 prefixes:
   linkml: https://w3id.org/linkml/
-  mrv: https://example.org/cdop/mrv-pod/
-default_prefix: mrv
+  cdop-mrv: https://clevinson.github.io/cdop-mrv-pod-schema/schema/
+default_prefix: cdop-mrv
 default_range: string
 imports:
   - linkml:types
@@ -346,9 +346,7 @@ classes:
         notes:
           - Conditional protocol requirements are documented but not enforced by this proof of concept.
       chain_of_custody_and_application_evidence:
-        description: >-
-          Documents tracing the monitored material from feedstock sourcing through production and
-          final application.
+        description: "Documents tracing the monitored material from feedstock sourcing through production and final application. "
         range: uri
         multivalued: true
         annotations:

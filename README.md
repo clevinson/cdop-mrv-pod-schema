@@ -1,6 +1,6 @@
 # CDOP MRV pod schemas
 
-A small LinkML proof of concept translated from `MRV August 11.xlsx` for discussion
+A small LinkML proof of concept aligned with `MRV September 22.xlsx` for discussion
 with the CDOP MRV pod. All definitions live in [schema/mrv-pod.yaml](schema/mrv-pod.yaml),
 with comments separating the entities and picklists. Edit that file going forward;
 the corrected workbook is a one-time snapshot to share with the group.
@@ -91,9 +91,11 @@ cross-references, alignment of parallel indicator lists, and automatic unit-symb
 derivation are not validated. `unit_type` includes Date, but the workbook supplies
 no corresponding unit symbol; the original picklists are preserved.
 
-The `https://example.org/cdop/mrv-pod` schema identifier is a placeholder, not a
-published vocabulary. Replace it and the `mrv` prefix when the pod chooses a
-permanent namespace.
+The schema identifier and `cdop-mrv` prefix use
+`https://clevinson.github.io/cdop-mrv-pod-schema/schema/`. Generated class, field,
+and enum pages use singular `class/`, `slot/`, and `enum/` paths so identifiers
+such as `cdop-mrv:enum/ChangeType` resolve directly to their documentation.
+The schema overview is available at both the site root and `/schema/`.
 
 ## GitHub Pages
 

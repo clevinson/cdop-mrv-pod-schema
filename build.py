@@ -10,6 +10,7 @@ import sys
 import yaml
 
 DOCS = Path("build/docs")
+DOC_FOLDERS = {"classes": "class", "slots": "slot", "enums": "enum"}
 
 
 def json_schema(schema):
@@ -42,27 +43,45 @@ def clean_docs():
 
 def customize_docs():
     """Use workbook terminology and make the schema reference the landing page."""
+    # LinkML emits singular URI paths but plural documentation folders.
+    for plural, singular in DOC_FOLDERS.items():
+        folder = DOCS / "schema" / plural
+        if folder.exists():
+            folder.rename(folder.with_name(singular))
+
     for path in DOCS.rglob("*.md"):
-        # Preserve fenced/inline code, URIs and link destinations.
+        # Keep source snippets intact; rewrite only local links and prose labels.
         parts = re.split(r"(?ms)(^```.*?^```[^\n]*|`[^`\n]*`)", path.read_text())
         for index in range(0, len(parts), 2):
+            parts[index] = re.sub(
+                r"(\]\((?:\.\./)*(?:schema/)?)(classes|slots|enums)/",
+                lambda match: match[1] + DOC_FOLDERS[match[2]] + "/",
+                parts[index],
+            )
             parts[index] = re.sub(
                 r"(?<![\w/:])[Ss]lots?(?![\w/])",
                 lambda match: match[0].replace("Slot", "Field").replace("slot", "field"),
                 parts[index],
             )
+        for index in range(1, len(parts), 2):
+            if parts[index].startswith("```mermaid"):
+                parts[index] = re.sub(
+                    r'(\bclick [^\n]*? href "(?:\.\./)*)(classes|slots|enums)/',
+                    lambda match: match[1] + DOC_FOLDERS[match[2]] + "/",
+                    parts[index],
+                )
         path.write_text("".join(parts))
 
     index = DOCS / "schema/index.md"
     if index.exists():
         text = re.sub(r"(?m)^(?:URI|Name): .*\n", "", index.read_text())
         text = re.sub(
-            r"\]\((classes|slots|enums|types|schemas|subsets)/",
+            r"\]\((class|slot|enum|types|schemas|subsets)/",
             r"](schema/\1/",
             text,
         )
         (DOCS / "index.md").write_text(text)
-        index.unlink()
+        # Keep schema/index.md too: the schema's own identifier resolves here.
 
 
 def main():
