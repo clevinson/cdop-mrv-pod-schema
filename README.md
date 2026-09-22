@@ -65,10 +65,15 @@ External JSON Schema consumers should enable format checking for dates and URIs.
 
 ## Workbook translation
 
-The schema retains descriptions, picklists, field IDs, spreadsheet cell references,
-and the source/visibility/mutability/pre-issuance columns as annotations. Blank
-metadata stays unspecified. Cell comments in the workbook explain changes and
-retain original values.
+The schema retains descriptions and picklists. Workbook field IDs become native
+LinkML `rank` values on each attribute, recording its display order within its
+class (not a global identifier). Attributes remain in that order in the YAML and
+class documentation. Spreadsheet cell references and the
+source/visibility/mutability/pre-issuance columns remain annotations. Cardinality,
+datatype, and required/optional annotations are omitted because native LinkML
+properties already express those constraints; conditional requirements are kept
+in notes. Blank metadata stays unspecified. Cell comments in the workbook explain
+changes and retain original values.
 
 - Consolidated duplicate `Project.reporting` rows into one Public / Private,
   Mutable field, retaining both descriptions. Reused the duplicate row for the

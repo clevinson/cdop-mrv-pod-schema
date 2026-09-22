@@ -36,8 +36,8 @@ monitoring:
   monitoring_results:
     - monitoring_parameter: "Carbon stocks"
 attestation:
-  attestation_signature: "https://example.org/attestation.pdf"
-  attestation_signatory_name: "Alex Example"
-  attestation_signatory_title: "Project lead"
-  attestation_signatory_organization: "Example project proponent"
-  attestation_date: "2026-01-31"
+  signature: "https://example.org/attestation.pdf"
+  signatory_name: "Alex Example"
+  signatory_title: "Project lead"
+  signatory_organization: "Example project proponent"
+  date: "2026-01-31"

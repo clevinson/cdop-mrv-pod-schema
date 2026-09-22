@@ -28,20 +28,18 @@ classes:
     tree_root: true
     attributes:
       assessment_area:
+        rank: 1
         description: >-
           Eligibility context (Assessment Area / Supersection), if applicable.
         range: string
         annotations:
           source: "General!B2:L2"
-          field_id: "1"
-          cardinality: "0..1"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Immutable"
           pre_issuance: "Yes"
       reporting:
+        rank: 2
         description: >-
           Subfields related to reporting context. Key information pertaining to reporting requirements
           for the project.
@@ -50,15 +48,12 @@ classes:
         inlined: true
         annotations:
           source: "General!B3:L3"
-          field_id: "2"
-          cardinality: "1..1"
-          datatype: "ReportingContext"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public / Private"
           mutability: "Mutable"
           pre_issuance: "Yes (some fields)"
       verification_schedule:
+        rank: 3
         description: >-
           Key dates in the verification process.
         range: VerificationSchedule
@@ -66,15 +61,12 @@ classes:
         inlined: true
         annotations:
           source: "General!B4:L4"
-          field_id: "3"
-          cardinality: "1..1"
-          datatype: "VerificationSchedule"
-          required_optional: "Required"
           data_source: "Verification Body"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       monitoring:
+        rank: 4
         description: >-
           Key information pertaining to monitoring requirements, plans, and results for the project.
         range: MonitoringScope
@@ -82,15 +74,12 @@ classes:
         inlined: true
         annotations:
           source: "General!B5:L5"
-          field_id: "4"
-          cardinality: "1..1"
-          datatype: "MonitoringScope"
-          required_optional: "Required"
           data_source: "Project Developer / Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes (some fields)"
       attestation:
+        rank: 5
         description: >-
           Optional project attestation. When present, all required Attestation fields must be
           supplied.
@@ -98,11 +87,8 @@ classes:
         inlined: true
         annotations:
           source: "General!B6:L6"
-          field_id: "5"
-          cardinality: "0..1"
-          datatype: "Attestation"
-          required_optional: "Optional"
       methodology_reference:
+        rank: 6
         description: >-
           Methodology and version governing the project and monitoring report, including the
           methodology identifier and a link where available, e.g., “VM0044 v1.2.”
@@ -110,10 +96,6 @@ classes:
         required: true
         annotations:
           source: "General!B7:L7"
-          field_id: "6"
-          cardinality: "1..1"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Immutable"
@@ -123,77 +105,62 @@ classes:
   Attestation:
     description: "Signed attestation by the project proponent."
     attributes:
-      attestation_signature:
+      signature:
+        rank: 1
         description: >-
           Signed attestation by the project proponent.
         range: uri
         required: true
         annotations:
           source: "General!B9:L9"
-          field_id: "1"
-          cardinality: "1..1"
-          datatype: "URI"
-          required_optional: "Required"
           data_source: "Project Proponent"
           public_private: "Private"
           mutability: "Immutable"
           pre_issuance: "No"
-      attestation_signatory_name:
+      signatory_name:
+        rank: 2
         description: >-
           Name of the signatory.
         range: string
         required: true
         annotations:
           source: "General!B10:L10"
-          field_id: "2"
-          cardinality: "1..1"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
-      attestation_signatory_title:
+      signatory_title:
+        rank: 3
         description: >-
           Title of the signatory.
         range: string
         required: true
         annotations:
           source: "General!B11:L11"
-          field_id: "3"
-          cardinality: "1..1"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
-      attestation_signatory_organization:
+      signatory_organization:
+        rank: 4
         description: >-
           Organization of the signatory.
         range: string
         required: true
         annotations:
           source: "General!B12:L12"
-          field_id: "4"
-          cardinality: "1..1"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
-      attestation_date:
+      date:
+        rank: 5
         description: >-
           Date signed.
         range: date
         required: true
         annotations:
           source: "General!B13:L13"
-          field_id: "5"
-          cardinality: "1..1"
-          datatype: "Date"
-          required_optional: "Required"
           data_source: "Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
@@ -204,21 +171,19 @@ classes:
     description: "Monitoring requirements, data, plans and results for a project."
     attributes:
       requirement_categories_monitored:
+        rank: 1
         description: >-
           Standardized set of protocol requirement categories the project monitors.
         range: string
         required: true
         annotations:
           source: "General!B15:L15"
-          field_id: "1"
-          cardinality: "1..1"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       methods_used_to_monitor:
+        rank: 2
         description: >-
           Protocol, tools, and methods used to monitor (e.g., CAR Forest Project Protocol v5.x,
           inventory methodology, iTree Canopy).
@@ -226,15 +191,12 @@ classes:
         required: true
         annotations:
           source: "General!B16:L16"
-          field_id: "2"
-          cardinality: "1..1"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       input_data:
+        rank: 3
         description: >-
           The actual measured data, according to the definitions in the input variables
         range: JsonObject
@@ -245,15 +207,12 @@ classes:
         inlined_as_list: true
         annotations:
           source: "General!B17:L17"
-          field_id: "3"
-          cardinality: "1..*"
-          datatype: "JsonObject"
-          required_optional: "Required"
           data_source: "Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       output_data:
+        rank: 4
         description: >-
           The actual measured data, according to the definitions in the output variables
         range: JsonObject
@@ -264,15 +223,12 @@ classes:
         inlined_as_list: true
         annotations:
           source: "General!B18:L18"
-          field_id: "4"
-          cardinality: "1..*"
-          datatype: "JsonObject"
-          required_optional: "Required"
           data_source: "Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       input_variables:
+        rank: 5
         description: >-
           Description of the input variables, how they are measured, the accuracy and precision of the
           measurement system, unit type, and any other information required by the methodology
@@ -284,15 +240,12 @@ classes:
         inlined_as_list: true
         annotations:
           source: "General!B19:L19"
-          field_id: "5"
-          cardinality: "1..*"
-          datatype: "JsonObject"
-          required_optional: "Required"
           data_source: "Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       output_variables:
+        rank: 6
         description: >-
           Description of the output variables, and their expected statistical variances, and accuracy
         range: JsonObject
@@ -303,15 +256,12 @@ classes:
         inlined_as_list: true
         annotations:
           source: "General!B20:L20"
-          field_id: "6"
-          cardinality: "1..*"
-          datatype: "JsonObject"
-          required_optional: "Required"
           data_source: "Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       calculation_worksheet:
+        rank: 7
         description: >-
           The Annual Monitoring Calculation Worksheet (Excel) that must accompany every monitoring
           report. Contains all pool calculations, confidence deduction, sequential sampling, secondary
@@ -319,26 +269,20 @@ classes:
         range: uri
         annotations:
           source: "General!B21:L21"
-          field_id: "7"
-          cardinality: "0..1"
-          datatype: "URI"
-          required_optional: "Required (when seeking CRTs)"
           data_source: "Project Developer"
           public_private: "Private"
           mutability: "Mutable"
           pre_issuance: "No"
         notes:
+          - "Required (when seeking CRTs)"
           - Conditional protocol requirements are documented but not enforced by this proof of concept.
       hwp_worksheet:
+        rank: 8
         description: >-
           The Harvested Wood Products Worksheet required by the protocol.
         range: uri
         annotations:
           source: "General!B22:L22"
-          field_id: "8"
-          cardinality: "0..1"
-          datatype: "URI"
-          required_optional: "The Harvested Wood Products Worksheet required by the protocol."
           data_source: "Project Developer"
           public_private: "Private"
           mutability: "Mutable"
@@ -346,22 +290,21 @@ classes:
         notes:
           - Conditional protocol requirements are documented but not enforced by this proof of concept.
       chain_of_custody_and_application_evidence:
+        rank: 9
         description: "Documents tracing the monitored material from feedstock sourcing through production and final application. "
         range: uri
         multivalued: true
         annotations:
           source: "General!B23:L23"
-          field_id: "9"
-          cardinality: "0..*"
-          datatype: "URI"
-          required_optional: "Required where applicable"
           data_source: "Project Developer"
           public_private: "Private"
           mutability: "Mutable"
           pre_issuance: "Yes"
         notes:
+          - "Required where applicable"
           - Conditional protocol requirements are documented but not enforced by this proof of concept.
       monitoring_plans:
+        rank: 10
         description: >-
           Monitoring plans for the project, one record per monitoring parameter.
         range: MonitoringPlan
@@ -370,11 +313,8 @@ classes:
         inlined_as_list: true
         annotations:
           source: "General!B24:L24"
-          field_id: "10"
-          cardinality: "0..*"
-          datatype: "MonitoringPlan"
-          required_optional: "Optional"
       monitoring_results:
+        rank: 11
         description: >-
           Monitoring results for the reporting period, one record per monitoring parameter.
         range: MonitoringResult
@@ -383,16 +323,13 @@ classes:
         inlined_as_list: true
         annotations:
           source: "General!B25:L25"
-          field_id: "11"
-          cardinality: "0..*"
-          datatype: "MonitoringResult"
-          required_optional: "Optional"
 
   # --- ReportingContext ---
   ReportingContext:
     description: "Reporting periods and report preparation details."
     attributes:
       reporting_period:
+        rank: 1
         description: >-
           Current reporting period (start-end).
         range: DateRange
@@ -400,15 +337,12 @@ classes:
         inlined: true
         annotations:
           source: "General!B27:L27"
-          field_id: "1"
-          cardinality: "1..1"
-          datatype: "DateRange"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Immutable"
           pre_issuance: "No"
       initial_reporting_period:
+        rank: 2
         description: >-
           First reporting period (start-end).
         range: DateRange
@@ -416,40 +350,30 @@ classes:
         inlined: true
         annotations:
           source: "General!B28:L28"
-          field_id: "2"
-          cardinality: "1..1"
-          datatype: "DateRange"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Immutable"
           pre_issuance: "Yes"
       report_preparer:
+        rank: 3
         description: >-
           Individual completing the report.
         range: string
         required: true
         annotations:
           source: "General!B29:L29"
-          field_id: "3"
-          cardinality: "1..1"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Private"
           mutability: "Mutable"
           pre_issuance: "No"
       report_completion_date:
+        rank: 4
         description: >-
           Date the report was completed.
         range: date
         required: true
         annotations:
           source: "General!B30:L30"
-          field_id: "4"
-          cardinality: "1..1"
-          datatype: "Date"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
@@ -460,31 +384,25 @@ classes:
     description: "Dates of completed and planned site-visit verification."
     attributes:
       last_verification_date:
+        rank: 1
         description: >-
           Completion date of the last site-visit verification.
         range: date
         required: true
         annotations:
           source: "General!B32:L32"
-          field_id: "1"
-          cardinality: "1..1"
-          datatype: "Date"
-          required_optional: "Required"
           data_source: "Verification Body"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       next_verification_date:
+        rank: 2
         description: >-
           Date of the next planned site-visit verification.
         range: date
         required: true
         annotations:
           source: "General!B33:L33"
-          field_id: "2"
-          cardinality: "1..1"
-          datatype: "Date"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
@@ -495,6 +413,7 @@ classes:
     description: "The monitoring plan for one protocol requirement or carbon metric."
     attributes:
       monitoring_parameter:
+        rank: 1
         description: >-
           The specific protocol requirement or carbon metric being monitored. Drives every field
           below.
@@ -502,44 +421,35 @@ classes:
         required: true
         annotations:
           source: "Monitoring Plan!B2:L2"
-          field_id: "1"
-          cardinality: "1..1"
-          datatype: "Picklist"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       overview_of_status_for_picklist_value:
+        rank: 2
         description: >-
           Description of the project's status and approach for the selected parameter
           (picklist_value).
         range: string
         annotations:
           source: "Monitoring Plan!B3:L3"
-          field_id: "2"
-          cardinality: "0..1"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       approach_to_monitor_picklist_value:
+        rank: 3
         description: >-
           The measuring and monitoring plan for the selected parameter (picklist_value).
         range: string
         annotations:
           source: "Monitoring Plan!B4:L4"
-          field_id: "3"
-          cardinality: "0..1"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       indicator_id:
+        rank: 4
         description: >-
           Unique ID distinguishing indicators within one parameter (e.g. each carbon pool, each risk
           category, hwp_actual, secondary_effects_total, buffer_contribution_qty, etc.).
@@ -547,15 +457,12 @@ classes:
         multivalued: true
         annotations:
           source: "Monitoring Plan!B5:L5"
-          field_id: "4"
-          cardinality: "0..*"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       unit_description:
+        rank: 5
         description: >-
           The unit used to track the indicator (e.g. 'tonnes CO2e in the standing live pool', 'tCO2e
           in harvested wood products', 'm³ delivered to mills').
@@ -563,40 +470,30 @@ classes:
         multivalued: true
         annotations:
           source: "Monitoring Plan!B6:L6"
-          field_id: "5"
-          cardinality: "0..*"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       unit_type:
+        rank: 6
         description: >-
           The metric type used to quantify the indicator.
         range: UnitType
         multivalued: true
         annotations:
           source: "Monitoring Plan!B7:L7"
-          field_id: "6"
-          cardinality: "0..*"
-          datatype: "Picklist"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       unit_symbol:
+        rank: 7
         description: >-
           Derived from unit_type; the symbol representing the unit.
         range: UnitSymbol
         multivalued: true
         annotations:
           source: "Monitoring Plan!B8:L8"
-          field_id: "7"
-          cardinality: "0..*"
-          datatype: "Picklist Auto"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
@@ -604,36 +501,31 @@ classes:
         notes:
           - The workbook does not define a complete unit_type-to-symbol mapping; no automatic derivation is performed.
       monitoring_frequency:
+        rank: 8
         description: >-
           How often the indicator is measured.
         range: MonitoringFrequency
         multivalued: true
         annotations:
           source: "Monitoring Plan!B9:L9"
-          field_id: "8"
-          cardinality: "0..*"
-          datatype: "Picklist"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       baseline_or_prior_value:
+        rank: 9
         description: >-
           Baseline or prior-reporting-period reference value for the indicator.
         range: string
         multivalued: true
         annotations:
           source: "Monitoring Plan!B10:L10"
-          field_id: "9"
-          cardinality: "0..*"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       required_threshold:
+        rank: 10
         description: >-
           Protocol threshold the indicator is measured against (e.g. '>=95%', '>=40% canopy', 'N/A',
           'If risk rating increased').
@@ -641,30 +533,24 @@ classes:
         multivalued: true
         annotations:
           source: "Monitoring Plan!B11:L11"
-          field_id: "10"
-          cardinality: "0..*"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       supporting_evidence:
+        rank: 11
         description: >-
           Documentation supporting the plan (e.g., inventory report, management plan, certificate).
         range: uri
         multivalued: true
         annotations:
           source: "Monitoring Plan!B12:L12"
-          field_id: "11"
-          cardinality: "0..*"
-          datatype: "URI"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       equation_reference:
+        rank: 12
         description: >-
           Methodology equation or equations in which the indicator is used as an input or produced as
           an output, e.g., “Equation 2” or “Equations 2, 3, 6 and 9.”
@@ -672,16 +558,13 @@ classes:
         multivalued: true
         annotations:
           source: "Monitoring Plan!B13:L13"
-          field_id: "12"
-          cardinality: "0..*"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
           picklist_options: "—"
       source_of_data:
+        rank: 13
         description: >-
           Origin of the data used for the indicator, such as on-site measurements, laboratory
           analysis, production records, invoices, third-party records or an approved methodology
@@ -692,16 +575,13 @@ classes:
         minimum_cardinality: 1
         annotations:
           source: "Monitoring Plan!B14:L14"
-          field_id: "13"
-          cardinality: "1..*"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
           picklist_options: "—"
       qa_qc_procedures:
+        rank: 14
         description: >-
           Procedures used to confirm the accuracy, completeness and integrity of the indicator,
           including equipment calibration, laboratory accreditation, reconciliation to invoices or
@@ -710,16 +590,13 @@ classes:
         required: true
         annotations:
           source: "Monitoring Plan!B15:L15"
-          field_id: "14"
-          cardinality: "1..1"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
           picklist_options: "—"
       purpose_of_data:
+        rank: 15
         description: >-
           Reason the indicator is required under the methodology, such as demonstrating eligibility,
           establishing the baseline, calculating project emissions, calculating leakage or determining
@@ -730,25 +607,18 @@ classes:
         minimum_cardinality: 1
         annotations:
           source: "Monitoring Plan!B16:L16"
-          field_id: "15"
-          cardinality: "1..*"
-          datatype: "Text"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       calculation_method:
+        rank: 16
         description: >-
           Formula, external tool or procedure used to convert the source data into the monitored
           indicator or calculated result, including any methodology defaults or assumptions applied.
         range: string
         annotations:
           source: "Monitoring Plan!B17:L17"
-          field_id: "16"
-          cardinality: "0..1"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
@@ -759,21 +629,19 @@ classes:
     description: "Results for one monitored parameter in the current reporting period."
     attributes:
       monitoring_parameter:
+        rank: 1
         description: >-
           The parameter being reported on this period. Links to the Monitoring Plan.
         range: MonitoringParameter
         required: true
         annotations:
           source: "Monitoring Result!B2:L2"
-          field_id: "1"
-          cardinality: "1..1"
-          datatype: "Picklist"
-          required_optional: "Required"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       indicator_id:
+        rank: 2
         description: >-
           Links this result to a Monitoring Plan indicator (same ID). Examples: hwp_actual,
           hwp_baseline, harvest_volume, secondary_effects_total, buffer_contribution_qty, net_ghg,
@@ -782,15 +650,12 @@ classes:
         multivalued: true
         annotations:
           source: "Monitoring Result!B3:L3"
-          field_id: "2"
-          cardinality: "0..*"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       monitored_value_for_picklist_value:
+        rank: 3
         description: >-
           Actual measured value for the indicator this reporting period. For quantitative indicators
           use the number + unit (e.g. 12500 tCO2e). For text/narrative indicators put the full text
@@ -799,15 +664,12 @@ classes:
         multivalued: true
         annotations:
           source: "Monitoring Result!B4:L4"
-          field_id: "3"
-          cardinality: "0..*"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer / Verification Body / Registry"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       compliance_result:
+        rank: 4
         description: >-
           Whether the indicator meets its protocol requirement this period. Picklist: Met | Not met |
           In progress | N/A
@@ -815,30 +677,24 @@ classes:
         multivalued: true
         annotations:
           source: "Monitoring Result!B5:L5"
-          field_id: "4"
-          cardinality: "0..*"
-          datatype: "Picklist"
-          required_optional: "Optional"
           data_source: "Project Developer / Verification Body / Registry"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       change_type:
+        rank: 5
         description: >-
           How change vs baseline/prior is expressed - only when unit_type is Change.
         range: ChangeType
         multivalued: true
         annotations:
           source: "Monitoring Result!B6:L6"
-          field_id: "5"
-          cardinality: "0..*"
-          datatype: "Picklist"
-          required_optional: "Optional"
           data_source: "Project Developer / Verification Body / Registry"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       narrative_or_explanation:
+        rank: 6
         description: >-
           Required narrative for this result (e.g. ownership-change details, reversal nature, progress
           explanation, 10-year standing-live decline explanation, HWP calculation notes,
@@ -847,15 +703,12 @@ classes:
         multivalued: true
         annotations:
           source: "Monitoring Result!B7:L7"
-          field_id: "6"
-          cardinality: "0..*"
-          datatype: "Text"
-          required_optional: "Optional"
           data_source: "Project Developer / Verification Body / Registry"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "No"
       supporting_evidence:
+        rank: 7
         description: >-
           Documentation supporting the ex-post result (e.g. Monitoring Report, Calculation Worksheet,
           HWP Worksheet, satellite images, recorded deeds, mill affidavits, GIS files).
@@ -863,10 +716,6 @@ classes:
         multivalued: true
         annotations:
           source: "Monitoring Result!B8:L8"
-          field_id: "7"
-          cardinality: "0..*"
-          datatype: "URI"
-          required_optional: "Optional"
           data_source: "Project Developer / Verification Body / Registry"
           public_private: "Public"
           mutability: "Mutable"
@@ -877,27 +726,21 @@ classes:
     description: "A reporting period represented by start and end dates. Chronological ordering is not validated."
     attributes:
       start_date:
+        rank: 1
         description: >-
           Start date of the reporting period.
         range: date
         required: true
         annotations:
           source: "General!B35:L35"
-          field_id: "1"
-          cardinality: "1..1"
-          datatype: "Date"
-          required_optional: "Required"
       end_date:
+        rank: 2
         description: >-
           End date of the reporting period.
         range: date
         required: true
         annotations:
           source: "General!B36:L36"
-          field_id: "2"
-          cardinality: "1..1"
-          datatype: "Date"
-          required_optional: "Required"
 
   # --- Open JSON objects used in the input/output arrays ---
   JsonObject:
