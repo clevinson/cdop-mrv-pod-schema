@@ -1,0 +1,27 @@
+# Required fields only. Fictional data; arbitrary JSON-object contents are illustrative.
+methodology_reference: "CAR Forest Project Protocol v5.1"
+reporting:
+  reporting_period:
+    start_date: "2025-01-01"
+    end_date: "2025-12-31"
+  initial_reporting_period:
+    start_date: "2025-01-01"
+    end_date: "2025-12-31"
+  report_preparer: "Example preparer"
+  report_completion_date: "2026-01-31"
+verification_schedule:
+  last_verification_date: "2025-06-15"
+  next_verification_date: "2026-06-15"
+monitoring:
+  requirement_categories_monitored: "Carbon stocks"
+  methods_used_to_monitor: "Forest inventory"
+  input_data:
+    - stem_count: 10
+  output_data:
+    - carbon_stock_tco2e: 25
+  input_variables:
+    - name: stem_count
+      unit: count
+  output_variables:
+    - name: carbon_stock_tco2e
+      unit: tCO2e

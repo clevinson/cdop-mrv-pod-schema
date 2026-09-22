@@ -1,0 +1,976 @@
+# CDOP MRV pod — one-time translation of MRV August 11.xlsx.
+# Edit this schema going forward; the workbook is a corrected discussion snapshot.
+id: https://example.org/cdop/mrv-pod
+name: mrv_pod
+title: CDOP MRV Pod
+description: >-
+  A shared reference for the CDOP MRV pod's monitoring, reporting and verification
+  data, based on our MRV workbook. Explore the information recorded about a project,
+  its monitoring plans and results, reporting periods, and supporting evidence.
+  Each field describes what information to provide and whether it is required.
+  This is a draft for discussion and refinement with the pod.
+version: 0.1.0
+prefixes:
+  linkml: https://w3id.org/linkml/
+  mrv: https://example.org/cdop/mrv-pod/
+default_prefix: mrv
+default_range: string
+imports:
+  - linkml:types
+
+# Classes and their fields. Spreadsheet metadata is retained as annotations.
+# Visibility/mutability/pre-issuance annotations describe policy; they do not enforce it.
+classes:
+
+  # --- Project ---
+  Project:
+    description: "A project with its reporting context, verification schedule and monitoring scope."
+    tree_root: true
+    attributes:
+      assessment_area:
+        description: >-
+          Eligibility context (Assessment Area / Supersection), if applicable.
+        range: string
+        annotations:
+          source: "General!B2:L2"
+          field_id: "1"
+          cardinality: "0..1"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Immutable"
+          pre_issuance: "Yes"
+      reporting:
+        description: >-
+          Subfields related to reporting context. Key information pertaining to reporting requirements
+          for the project.
+        range: ReportingContext
+        required: true
+        inlined: true
+        annotations:
+          source: "General!B3:L3"
+          field_id: "2"
+          cardinality: "1..1"
+          datatype: "ReportingContext"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public / Private"
+          mutability: "Mutable"
+          pre_issuance: "Yes (some fields)"
+      verification_schedule:
+        description: >-
+          Key dates in the verification process.
+        range: VerificationSchedule
+        required: true
+        inlined: true
+        annotations:
+          source: "General!B4:L4"
+          field_id: "3"
+          cardinality: "1..1"
+          datatype: "VerificationSchedule"
+          required_optional: "Required"
+          data_source: "Verification Body"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      monitoring:
+        description: >-
+          Key information pertaining to monitoring requirements, plans, and results for the project.
+        range: MonitoringScope
+        required: true
+        inlined: true
+        annotations:
+          source: "General!B5:L5"
+          field_id: "4"
+          cardinality: "1..1"
+          datatype: "MonitoringScope"
+          required_optional: "Required"
+          data_source: "Project Developer / Project Proponent"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes (some fields)"
+      attestation:
+        description: >-
+          Optional project attestation. When present, all required Attestation fields must be
+          supplied.
+        range: Attestation
+        inlined: true
+        annotations:
+          source: "General!B6:L6"
+          field_id: "5"
+          cardinality: "0..1"
+          datatype: "Attestation"
+          required_optional: "Optional"
+      methodology_reference:
+        description: >-
+          Methodology and version governing the project and monitoring report, including the
+          methodology identifier and a link where available, e.g., “VM0044 v1.2.”
+        range: string
+        required: true
+        annotations:
+          source: "General!B7:L7"
+          field_id: "6"
+          cardinality: "1..1"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Immutable"
+          pre_issuance: "Yes"
+
+  # --- Attestation ---
+  Attestation:
+    description: "Signed attestation by the project proponent."
+    attributes:
+      attestation_signature:
+        description: >-
+          Signed attestation by the project proponent.
+        range: uri
+        required: true
+        annotations:
+          source: "General!B9:L9"
+          field_id: "1"
+          cardinality: "1..1"
+          datatype: "URI"
+          required_optional: "Required"
+          data_source: "Project Proponent"
+          public_private: "Private"
+          mutability: "Immutable"
+          pre_issuance: "No"
+      attestation_signatory_name:
+        description: >-
+          Name of the signatory.
+        range: string
+        required: true
+        annotations:
+          source: "General!B10:L10"
+          field_id: "2"
+          cardinality: "1..1"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Proponent"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      attestation_signatory_title:
+        description: >-
+          Title of the signatory.
+        range: string
+        required: true
+        annotations:
+          source: "General!B11:L11"
+          field_id: "3"
+          cardinality: "1..1"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Proponent"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      attestation_signatory_organization:
+        description: >-
+          Organization of the signatory.
+        range: string
+        required: true
+        annotations:
+          source: "General!B12:L12"
+          field_id: "4"
+          cardinality: "1..1"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Proponent"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      attestation_date:
+        description: >-
+          Date signed.
+        range: date
+        required: true
+        annotations:
+          source: "General!B13:L13"
+          field_id: "5"
+          cardinality: "1..1"
+          datatype: "Date"
+          required_optional: "Required"
+          data_source: "Project Proponent"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+
+  # --- MonitoringScope ---
+  MonitoringScope:
+    description: "Monitoring requirements, data, plans and results for a project."
+    attributes:
+      requirement_categories_monitored:
+        description: >-
+          Standardized set of protocol requirement categories the project monitors.
+        range: string
+        required: true
+        annotations:
+          source: "General!B15:L15"
+          field_id: "1"
+          cardinality: "1..1"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      methods_used_to_monitor:
+        description: >-
+          Protocol, tools, and methods used to monitor (e.g., CAR Forest Project Protocol v5.x,
+          inventory methodology, iTree Canopy).
+        range: string
+        required: true
+        annotations:
+          source: "General!B16:L16"
+          field_id: "2"
+          cardinality: "1..1"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      input_data:
+        description: >-
+          The actual measured data, according to the definitions in the input variables
+        range: JsonObject
+        required: true
+        multivalued: true
+        minimum_cardinality: 1
+        inlined: true
+        inlined_as_list: true
+        annotations:
+          source: "General!B17:L17"
+          field_id: "3"
+          cardinality: "1..*"
+          datatype: "JsonObject"
+          required_optional: "Required"
+          data_source: "Project Proponent"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      output_data:
+        description: >-
+          The actual measured data, according to the definitions in the output variables
+        range: JsonObject
+        required: true
+        multivalued: true
+        minimum_cardinality: 1
+        inlined: true
+        inlined_as_list: true
+        annotations:
+          source: "General!B18:L18"
+          field_id: "4"
+          cardinality: "1..*"
+          datatype: "JsonObject"
+          required_optional: "Required"
+          data_source: "Project Proponent"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      input_variables:
+        description: >-
+          Description of the input variables, how they are measured, the accuracy and precision of the
+          measurement system, unit type, and any other information required by the methodology
+        range: JsonObject
+        required: true
+        multivalued: true
+        minimum_cardinality: 1
+        inlined: true
+        inlined_as_list: true
+        annotations:
+          source: "General!B19:L19"
+          field_id: "5"
+          cardinality: "1..*"
+          datatype: "JsonObject"
+          required_optional: "Required"
+          data_source: "Project Proponent"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      output_variables:
+        description: >-
+          Description of the output variables, and their expected statistical variances, and accuracy
+        range: JsonObject
+        required: true
+        multivalued: true
+        minimum_cardinality: 1
+        inlined: true
+        inlined_as_list: true
+        annotations:
+          source: "General!B20:L20"
+          field_id: "6"
+          cardinality: "1..*"
+          datatype: "JsonObject"
+          required_optional: "Required"
+          data_source: "Project Proponent"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      calculation_worksheet:
+        description: >-
+          The Annual Monitoring Calculation Worksheet (Excel) that must accompany every monitoring
+          report. Contains all pool calculations, confidence deduction, sequential sampling, secondary
+          effects, and preliminary net GHG.
+        range: uri
+        annotations:
+          source: "General!B21:L21"
+          field_id: "7"
+          cardinality: "0..1"
+          datatype: "URI"
+          required_optional: "Required (when seeking CRTs)"
+          data_source: "Project Developer"
+          public_private: "Private"
+          mutability: "Mutable"
+          pre_issuance: "No"
+        notes:
+          - Conditional protocol requirements are documented but not enforced by this proof of concept.
+      hwp_worksheet:
+        description: >-
+          The Harvested Wood Products Worksheet required by the protocol.
+        range: uri
+        annotations:
+          source: "General!B22:L22"
+          field_id: "8"
+          cardinality: "0..1"
+          datatype: "URI"
+          required_optional: "The Harvested Wood Products Worksheet required by the protocol."
+          data_source: "Project Developer"
+          public_private: "Private"
+          mutability: "Mutable"
+          pre_issuance: "No"
+        notes:
+          - Conditional protocol requirements are documented but not enforced by this proof of concept.
+      chain_of_custody_and_application_evidence:
+        description: >-
+          Documents tracing the monitored material from feedstock sourcing through production and
+          final application.
+        range: uri
+        multivalued: true
+        annotations:
+          source: "General!B23:L23"
+          field_id: "9"
+          cardinality: "0..*"
+          datatype: "URI"
+          required_optional: "Required where applicable"
+          data_source: "Project Developer"
+          public_private: "Private"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+        notes:
+          - Conditional protocol requirements are documented but not enforced by this proof of concept.
+      monitoring_plans:
+        description: >-
+          Monitoring plans for the project, one record per monitoring parameter.
+        range: MonitoringPlan
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        annotations:
+          source: "General!B24:L24"
+          field_id: "10"
+          cardinality: "0..*"
+          datatype: "MonitoringPlan"
+          required_optional: "Optional"
+      monitoring_results:
+        description: >-
+          Monitoring results for the reporting period, one record per monitoring parameter.
+        range: MonitoringResult
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        annotations:
+          source: "General!B25:L25"
+          field_id: "11"
+          cardinality: "0..*"
+          datatype: "MonitoringResult"
+          required_optional: "Optional"
+
+  # --- ReportingContext ---
+  ReportingContext:
+    description: "Reporting periods and report preparation details."
+    attributes:
+      reporting_period:
+        description: >-
+          Current reporting period (start-end).
+        range: DateRange
+        required: true
+        inlined: true
+        annotations:
+          source: "General!B27:L27"
+          field_id: "1"
+          cardinality: "1..1"
+          datatype: "DateRange"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Immutable"
+          pre_issuance: "No"
+      initial_reporting_period:
+        description: >-
+          First reporting period (start-end).
+        range: DateRange
+        required: true
+        inlined: true
+        annotations:
+          source: "General!B28:L28"
+          field_id: "2"
+          cardinality: "1..1"
+          datatype: "DateRange"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Immutable"
+          pre_issuance: "Yes"
+      report_preparer:
+        description: >-
+          Individual completing the report.
+        range: string
+        required: true
+        annotations:
+          source: "General!B29:L29"
+          field_id: "3"
+          cardinality: "1..1"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Private"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      report_completion_date:
+        description: >-
+          Date the report was completed.
+        range: date
+        required: true
+        annotations:
+          source: "General!B30:L30"
+          field_id: "4"
+          cardinality: "1..1"
+          datatype: "Date"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+
+  # --- VerificationSchedule ---
+  VerificationSchedule:
+    description: "Dates of completed and planned site-visit verification."
+    attributes:
+      last_verification_date:
+        description: >-
+          Completion date of the last site-visit verification.
+        range: date
+        required: true
+        annotations:
+          source: "General!B32:L32"
+          field_id: "1"
+          cardinality: "1..1"
+          datatype: "Date"
+          required_optional: "Required"
+          data_source: "Verification Body"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      next_verification_date:
+        description: >-
+          Date of the next planned site-visit verification.
+        range: date
+        required: true
+        annotations:
+          source: "General!B33:L33"
+          field_id: "2"
+          cardinality: "1..1"
+          datatype: "Date"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+
+  # --- MonitoringPlan ---
+  MonitoringPlan:
+    description: "The monitoring plan for one protocol requirement or carbon metric."
+    attributes:
+      monitoring_parameter:
+        description: >-
+          The specific protocol requirement or carbon metric being monitored. Drives every field
+          below.
+        range: MonitoringParameter
+        required: true
+        annotations:
+          source: "Monitoring Plan!B2:L2"
+          field_id: "1"
+          cardinality: "1..1"
+          datatype: "Picklist"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      overview_of_status_for_picklist_value:
+        description: >-
+          Description of the project's status and approach for the selected parameter
+          (picklist_value).
+        range: string
+        annotations:
+          source: "Monitoring Plan!B3:L3"
+          field_id: "2"
+          cardinality: "0..1"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      approach_to_monitor_picklist_value:
+        description: >-
+          The measuring and monitoring plan for the selected parameter (picklist_value).
+        range: string
+        annotations:
+          source: "Monitoring Plan!B4:L4"
+          field_id: "3"
+          cardinality: "0..1"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      indicator_id:
+        description: >-
+          Unique ID distinguishing indicators within one parameter (e.g. each carbon pool, each risk
+          category, hwp_actual, secondary_effects_total, buffer_contribution_qty, etc.).
+        range: string
+        multivalued: true
+        annotations:
+          source: "Monitoring Plan!B5:L5"
+          field_id: "4"
+          cardinality: "0..*"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      unit_description:
+        description: >-
+          The unit used to track the indicator (e.g. 'tonnes CO2e in the standing live pool', 'tCO2e
+          in harvested wood products', 'm³ delivered to mills').
+        range: string
+        multivalued: true
+        annotations:
+          source: "Monitoring Plan!B6:L6"
+          field_id: "5"
+          cardinality: "0..*"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      unit_type:
+        description: >-
+          The metric type used to quantify the indicator.
+        range: UnitType
+        multivalued: true
+        annotations:
+          source: "Monitoring Plan!B7:L7"
+          field_id: "6"
+          cardinality: "0..*"
+          datatype: "Picklist"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      unit_symbol:
+        description: >-
+          Derived from unit_type; the symbol representing the unit.
+        range: UnitSymbol
+        multivalued: true
+        annotations:
+          source: "Monitoring Plan!B8:L8"
+          field_id: "7"
+          cardinality: "0..*"
+          datatype: "Picklist Auto"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+        notes:
+          - The workbook does not define a complete unit_type-to-symbol mapping; no automatic derivation is performed.
+      monitoring_frequency:
+        description: >-
+          How often the indicator is measured.
+        range: MonitoringFrequency
+        multivalued: true
+        annotations:
+          source: "Monitoring Plan!B9:L9"
+          field_id: "8"
+          cardinality: "0..*"
+          datatype: "Picklist"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      baseline_or_prior_value:
+        description: >-
+          Baseline or prior-reporting-period reference value for the indicator.
+        range: string
+        multivalued: true
+        annotations:
+          source: "Monitoring Plan!B10:L10"
+          field_id: "9"
+          cardinality: "0..*"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      required_threshold:
+        description: >-
+          Protocol threshold the indicator is measured against (e.g. '>=95%', '>=40% canopy', 'N/A',
+          'If risk rating increased').
+        range: string
+        multivalued: true
+        annotations:
+          source: "Monitoring Plan!B11:L11"
+          field_id: "10"
+          cardinality: "0..*"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      supporting_evidence:
+        description: >-
+          Documentation supporting the plan (e.g., inventory report, management plan, certificate).
+        range: uri
+        multivalued: true
+        annotations:
+          source: "Monitoring Plan!B12:L12"
+          field_id: "11"
+          cardinality: "0..*"
+          datatype: "URI"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      equation_reference:
+        description: >-
+          Methodology equation or equations in which the indicator is used as an input or produced as
+          an output, e.g., “Equation 2” or “Equations 2, 3, 6 and 9.”
+        range: string
+        multivalued: true
+        annotations:
+          source: "Monitoring Plan!B13:L13"
+          field_id: "12"
+          cardinality: "0..*"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+          picklist_options: "—"
+      source_of_data:
+        description: >-
+          Origin of the data used for the indicator, such as on-site measurements, laboratory
+          analysis, production records, invoices, third-party records or an approved methodology
+          default.
+        range: string
+        required: true
+        multivalued: true
+        minimum_cardinality: 1
+        annotations:
+          source: "Monitoring Plan!B14:L14"
+          field_id: "13"
+          cardinality: "1..*"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+          picklist_options: "—"
+      qa_qc_procedures:
+        description: >-
+          Procedures used to confirm the accuracy, completeness and integrity of the indicator,
+          including equipment calibration, laboratory accreditation, reconciliation to invoices or
+          inventories, data-integrity checks and corrective procedures.
+        range: string
+        required: true
+        annotations:
+          source: "Monitoring Plan!B15:L15"
+          field_id: "14"
+          cardinality: "1..1"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+          picklist_options: "—"
+      purpose_of_data:
+        description: >-
+          Reason the indicator is required under the methodology, such as demonstrating eligibility,
+          establishing the baseline, calculating project emissions, calculating leakage or determining
+          net reductions and removals.
+        range: string
+        required: true
+        multivalued: true
+        minimum_cardinality: 1
+        annotations:
+          source: "Monitoring Plan!B16:L16"
+          field_id: "15"
+          cardinality: "1..*"
+          datatype: "Text"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+      calculation_method:
+        description: >-
+          Formula, external tool or procedure used to convert the source data into the monitored
+          indicator or calculated result, including any methodology defaults or assumptions applied.
+        range: string
+        annotations:
+          source: "Monitoring Plan!B17:L17"
+          field_id: "16"
+          cardinality: "0..1"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "Yes"
+
+  # --- MonitoringResult ---
+  MonitoringResult:
+    description: "Results for one monitored parameter in the current reporting period."
+    attributes:
+      monitoring_parameter:
+        description: >-
+          The parameter being reported on this period. Links to the Monitoring Plan.
+        range: MonitoringParameter
+        required: true
+        annotations:
+          source: "Monitoring Result!B2:L2"
+          field_id: "1"
+          cardinality: "1..1"
+          datatype: "Picklist"
+          required_optional: "Required"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      indicator_id:
+        description: >-
+          Links this result to a Monitoring Plan indicator (same ID). Examples: hwp_actual,
+          hwp_baseline, harvest_volume, secondary_effects_total, buffer_contribution_qty, net_ghg,
+          live_10yr_decline_expl, etc.
+        range: string
+        multivalued: true
+        annotations:
+          source: "Monitoring Result!B3:L3"
+          field_id: "2"
+          cardinality: "0..*"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      monitored_value_for_picklist_value:
+        description: >-
+          Actual measured value for the indicator this reporting period. For quantitative indicators
+          use the number + unit (e.g. 12500 tCO2e). For text/narrative indicators put the full text
+          here or in narrative_or_explanation.
+        range: string
+        multivalued: true
+        annotations:
+          source: "Monitoring Result!B4:L4"
+          field_id: "3"
+          cardinality: "0..*"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer / Verification Body / Registry"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      compliance_result:
+        description: >-
+          Whether the indicator meets its protocol requirement this period. Picklist: Met | Not met |
+          In progress | N/A
+        range: ComplianceResult
+        multivalued: true
+        annotations:
+          source: "Monitoring Result!B5:L5"
+          field_id: "4"
+          cardinality: "0..*"
+          datatype: "Picklist"
+          required_optional: "Optional"
+          data_source: "Project Developer / Verification Body / Registry"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      change_type:
+        description: >-
+          How change vs baseline/prior is expressed - only when unit_type is Change.
+        range: ChangeType
+        multivalued: true
+        annotations:
+          source: "Monitoring Result!B6:L6"
+          field_id: "5"
+          cardinality: "0..*"
+          datatype: "Picklist"
+          required_optional: "Optional"
+          data_source: "Project Developer / Verification Body / Registry"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      narrative_or_explanation:
+        description: >-
+          Required narrative for this result (e.g. ownership-change details, reversal nature, progress
+          explanation, 10-year standing-live decline explanation, HWP calculation notes,
+          secondary-effects methodology notes).
+        range: string
+        multivalued: true
+        annotations:
+          source: "Monitoring Result!B7:L7"
+          field_id: "6"
+          cardinality: "0..*"
+          datatype: "Text"
+          required_optional: "Optional"
+          data_source: "Project Developer / Verification Body / Registry"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+      supporting_evidence:
+        description: >-
+          Documentation supporting the ex-post result (e.g. Monitoring Report, Calculation Worksheet,
+          HWP Worksheet, satellite images, recorded deeds, mill affidavits, GIS files).
+        range: uri
+        multivalued: true
+        annotations:
+          source: "Monitoring Result!B8:L8"
+          field_id: "7"
+          cardinality: "0..*"
+          datatype: "URI"
+          required_optional: "Optional"
+          data_source: "Project Developer / Verification Body / Registry"
+          public_private: "Public"
+          mutability: "Mutable"
+          pre_issuance: "No"
+
+  # --- DateRange ---
+  DateRange:
+    description: "A reporting period represented by start and end dates. Chronological ordering is not validated."
+    attributes:
+      start_date:
+        description: >-
+          Start date of the reporting period.
+        range: date
+        required: true
+        annotations:
+          source: "General!B35:L35"
+          field_id: "1"
+          cardinality: "1..1"
+          datatype: "Date"
+          required_optional: "Required"
+      end_date:
+        description: >-
+          End date of the reporting period.
+        range: date
+        required: true
+        annotations:
+          source: "General!B36:L36"
+          field_id: "2"
+          cardinality: "1..1"
+          datatype: "Date"
+          required_optional: "Required"
+
+  # --- Open JSON objects used in the input/output arrays ---
+  JsonObject:
+    description: An object with arbitrary JSON keys and values; internal structure is not yet specified.
+    extra_slots:
+      allowed: true
+    notes:
+      - LinkML 1.11.1 does not yet emit extra_slots in JSON Schema. The Makefile applies this one setting to the generated definition.
+
+# Picklists — values preserved exactly as written in the workbook.
+enums:
+  MonitoringParameter:
+    description: "Allowed MonitoringParameter values from the workbook."
+    permissible_values:
+      "Forest ownership": {}
+      "Native species composition": {}
+      "Sustainable management": {}
+      "Structural elements (dead wood)": {}
+      "Age-class distribution": {}
+      "Canopy cover": {}
+      "Carbon stocks": {}
+      "Inventory methodology": {}
+      "Permanence / reversal": {}
+      "Reversal risk rating": {}
+      "Buffer pool": {}
+      "CRT issuance / verification": {}
+      "Harvested Wood Products": {}
+      "Secondary Effects": {}
+      "Net GHG Calculation": {}
+  UnitType:
+    description: "Allowed UnitType values from the workbook."
+    permissible_values:
+      "Count": {}
+      "Percentage": {}
+      "Area": {}
+      "Mass (CO2e)": {}
+      "Value": {}
+      "Change": {}
+      "Binary": {}
+      "Date": {}
+  UnitSymbol:
+    description: "Allowed UnitSymbol values from the workbook."
+    permissible_values:
+      "#": {}
+      "%": {}
+      "ha / acres": {}
+      "tCO2e": {}
+      "USD": {}
+      "Δ": {}
+      "Y/N": {}
+  MonitoringFrequency:
+    description: "Allowed MonitoringFrequency values from the workbook."
+    permissible_values:
+      "Continuous": {}
+      "Annually": {}
+      "Per reporting period": {}
+      "Every site visit": {}
+      "Every 12 periods": {}
+      "Sporadically": {}
+      "Other": {}
+  ComplianceResult:
+    description: "Allowed ComplianceResult values from the workbook."
+    permissible_values:
+      "Met": {}
+      "Not met": {}
+      "In progress": {}
+      "N/A": {}
+  ChangeType:
+    description: "Allowed ChangeType values from the workbook."
+    permissible_values:
+      "Absolute": {}
+      "Relative": {}
+      "Index": {}
+      "Other": {}
