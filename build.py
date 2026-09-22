@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import shutil
 import sys
+from textwrap import indent
 
 import yaml
 
@@ -40,12 +41,22 @@ def clean_docs():
     DOCS.mkdir(parents=True)
 
 
+def example_tabs(match):
+    """Render a generated YAML example as JSON-first Material content tabs."""
+    yaml_text = match[2].rstrip()
+    json_text = json.dumps(yaml.safe_load(yaml_text), indent=2, ensure_ascii=False, allow_nan=False)
+    return match[1] + "\n\n".join(
+        f'=== "{language.upper()}"\n\n' + indent(f"```{language}\n{content}\n```", "    ")
+        for language, content in (("json", json_text), ("yaml", yaml_text))
+    ) + "\n"
+
+
 def customize_docs():
     """Use workbook terminology and make the schema reference the landing page."""
     prefix = yaml.safe_load(Path("schema/mrv-pod.yaml").read_text())["default_prefix"]
     for path in DOCS.rglob("*.md"):
         # Keep source snippets and external links intact.
-        parts = re.split(r"(?ms)(^```.*?^```[^\n]*|`[^`\n]*`)", path.read_text())
+        parts = re.split(r"(?ms)(^[ \t]*```.*?^[ \t]*```[^\n]*|`[^`\n]*`)", path.read_text())
         for index in range(0, len(parts), 2):
             # An element's identifier and its documentation URL are distinct.
             # Link the displayed identifier to this page without altering the URI.
@@ -59,7 +70,12 @@ def customize_docs():
                 lambda match: match[0].replace("Slot", "Field").replace("slot", "field"),
                 parts[index],
             )
-        path.write_text("".join(parts))
+        text = re.sub(
+            r"(?ms)(^### Example: [^\n]+\n\n)```yaml\n(.*?)^```[ \t]*$",
+            example_tabs,
+            "".join(parts),
+        )
+        path.write_text(text)
 
     index = DOCS / "schema/index.md"
     if index.exists():
