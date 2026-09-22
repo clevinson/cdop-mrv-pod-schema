@@ -92,9 +92,13 @@ derivation are not validated. `unit_type` includes Date, but the workbook suppli
 no corresponding unit symbol; the original picklists are preserved.
 
 The schema identifier and `cdop-mrv` prefix use
-`https://clevinson.github.io/cdop-mrv-pod-schema/schema/`. Generated class, field,
-and enum pages use singular `class/`, `slot/`, and `enum/` paths so identifiers
-such as `cdop-mrv:enum/ChangeType` resolve directly to their documentation.
+`https://clevinson.github.io/cdop-mrv-pod-schema/schema/`. Documentation uses
+LinkML's standard type-separated `classes/`, `slots/`, and `enums/` folders.
+LinkML derives identifiers automatically; no per-field URI declarations are
+needed. Identifiers and documentation URLs are distinct: the docs helper links
+displayed identifiers such as `cdop-mrv:enum/ChangeType` to their generated
+reference pages without changing the identifier itself. This does not set up
+redirects for the expanded identifier URLs.
 The schema overview is available at both the site root and `/schema/`.
 
 ## GitHub Pages

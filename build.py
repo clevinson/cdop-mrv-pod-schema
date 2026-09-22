@@ -10,7 +10,6 @@ import sys
 import yaml
 
 DOCS = Path("build/docs")
-DOC_FOLDERS = {"classes": "class", "slots": "slot", "enums": "enum"}
 
 
 def json_schema(schema):
@@ -43,19 +42,16 @@ def clean_docs():
 
 def customize_docs():
     """Use workbook terminology and make the schema reference the landing page."""
-    # LinkML emits singular URI paths but plural documentation folders.
-    for plural, singular in DOC_FOLDERS.items():
-        folder = DOCS / "schema" / plural
-        if folder.exists():
-            folder.rename(folder.with_name(singular))
-
+    prefix = yaml.safe_load(Path("schema/mrv-pod.yaml").read_text())["default_prefix"]
     for path in DOCS.rglob("*.md"):
-        # Keep source snippets intact; rewrite only local links and prose labels.
+        # Keep source snippets and external links intact.
         parts = re.split(r"(?ms)(^```.*?^```[^\n]*|`[^`\n]*`)", path.read_text())
         for index in range(0, len(parts), 2):
+            # An element's identifier and its documentation URL are distinct.
+            # Link the displayed identifier to this page without altering the URI.
             parts[index] = re.sub(
-                r"(\]\((?:\.\./)*(?:schema/)?)(classes|slots|enums)/",
-                lambda match: match[1] + DOC_FOLDERS[match[2]] + "/",
+                rf"(?m)^(URI: \[{re.escape(prefix)}:[^\]]+\])\([^)]+\)$",
+                lambda match: f"{match[1]}({path.name})",
                 parts[index],
             )
             parts[index] = re.sub(
@@ -63,20 +59,13 @@ def customize_docs():
                 lambda match: match[0].replace("Slot", "Field").replace("slot", "field"),
                 parts[index],
             )
-        for index in range(1, len(parts), 2):
-            if parts[index].startswith("```mermaid"):
-                parts[index] = re.sub(
-                    r'(\bclick [^\n]*? href "(?:\.\./)*)(classes|slots|enums)/',
-                    lambda match: match[1] + DOC_FOLDERS[match[2]] + "/",
-                    parts[index],
-                )
         path.write_text("".join(parts))
 
     index = DOCS / "schema/index.md"
     if index.exists():
         text = re.sub(r"(?m)^(?:URI|Name): .*\n", "", index.read_text())
         text = re.sub(
-            r"\]\((class|slot|enum|types|schemas|subsets)/",
+            r"\]\((classes|slots|enums|types|schemas|subsets)/",
             r"](schema/\1/",
             text,
         )

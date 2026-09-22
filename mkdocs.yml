@@ -19,9 +19,9 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
   - Overview: index.md
-  - Project: schema/class/Project.md
-  - Monitoring plan: schema/class/MonitoringPlan.md
-  - Monitoring result: schema/class/MonitoringResult.md
+  - Project: schema/classes/Project.md
+  - Monitoring plan: schema/classes/MonitoringPlan.md
+  - Monitoring result: schema/classes/MonitoringResult.md
   - Downloads:
       - LinkML YAML: schema/mrv-pod.yaml
       - JSON Schema: schema/mrv-pod.schema.json
