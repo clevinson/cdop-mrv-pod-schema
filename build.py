@@ -5,22 +5,11 @@ import json
 from pathlib import Path
 import re
 import shutil
-import sys
 from textwrap import indent
 
 import yaml
 
 DOCS = Path("build/docs")
-
-
-def json_schema(schema):
-    """Apply the extra_slots setting omitted by LinkML 1.11.1's generator."""
-    artifact = json.load(sys.stdin)
-    model = yaml.safe_load(Path(schema).read_text())
-    artifact["$defs"]["JsonObject"]["additionalProperties"] = model["classes"][
-        "JsonObject"
-    ]["extra_slots"]["allowed"]
-    print(json.dumps(artifact, indent=2, ensure_ascii=False))
 
 
 def validation_config(schema, artifact, examples):
@@ -92,8 +81,6 @@ def customize_docs():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    schema = commands.add_parser("json-schema", help="Patch generated JSON Schema from stdin")
-    schema.add_argument("schema", help="Source LinkML schema")
     config = commands.add_parser("validation-config", help="Print LinkML CLI configuration")
     config.add_argument("schema")
     config.add_argument("artifact", help="Generated JSON Schema")
@@ -102,9 +89,7 @@ def main():
     commands.add_parser("customize-docs", help="Customize generated Markdown for the pod")
     args = parser.parse_args()
 
-    if args.command == "json-schema":
-        json_schema(args.schema)
-    elif args.command == "validation-config":
+    if args.command == "validation-config":
         validation_config(args.schema, args.artifact, args.examples)
     elif args.command == "clean-docs":
         clean_docs()

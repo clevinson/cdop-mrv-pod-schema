@@ -23,7 +23,9 @@ nav:
   - Overview: index.md
   - Project: schema/classes/Project.md
   - Monitoring plan: schema/classes/MonitoringPlan.md
-  - Monitoring result: schema/classes/MonitoringResult.md
+  - Static value: schema/classes/StaticValue.md
+  - Measurement: schema/classes/Measurement.md
+  - Computed result: schema/classes/Result.md
   - Downloads:
       - LinkML YAML: schema/mrv-pod.yaml
       - JSON Schema: schema/mrv-pod.schema.json
