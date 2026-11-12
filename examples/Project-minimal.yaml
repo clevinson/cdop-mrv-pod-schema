@@ -1,27 +1,22 @@
-# Required fields only. Fictional data; arbitrary JSON-object contents are illustrative.
-methodology_reference: "CAR Forest Project Protocol v5.1"
+# Required fields plus the reporting period referenced by reporting context.
+# Fictional data; this is a structural example, not a verified methodology calculation.
+id: "project-minimal"
+methodology:
+  id: "VM0050"
+  version: "1.0"
 reporting:
-  reporting_period:
-    start_date: "2025-01-01"
-    end_date: "2025-12-31"
-  initial_reporting_period:
-    start_date: "2025-01-01"
-    end_date: "2025-12-31"
+  current_period: "period-2026"
+  initial_period: "period-2026"
   report_preparer: "Example preparer"
-  report_completion_date: "2026-01-31"
+  report_completion_date: "2027-01-31"
+reporting_periods:
+  - id: "period-2026"
+    date_range:
+      start_date: "2026-01-01"
+      end_date: "2026-12-31"
 verification_schedule:
-  last_verification_date: "2025-06-15"
-  next_verification_date: "2026-06-15"
+  last_verification_date: "2026-06-15"
+  next_verification_date: "2027-06-15"
 monitoring:
-  requirement_categories_monitored: "Carbon stocks"
-  methods_used_to_monitor: "Forest inventory"
-  input_data:
-    - stem_count: 10
-  output_data:
-    - carbon_stock_tco2e: 25
-  input_variables:
-    - name: stem_count
-      unit: count
-  output_variables:
-    - name: carbon_stock_tco2e
-      unit: tCO2e
+  requirement_categories_monitored: "Emission reductions"
+  methods_used_to_monitor: "Household fuel-use surveys"

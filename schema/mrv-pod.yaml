@@ -1,15 +1,33 @@
-# CDOP MRV pod — aligned with MRV September 22.xlsx.
-# Edit this schema going forward; the workbook is a corrected discussion snapshot.
+# CDOP MRV pod schema — 2026-09-24 revision (CarbonAi pass on Cory's 0.1.0 LinkML port).
+# Changes from 0.1.0:
+#   - Typed values: new QuantityValue (value + unit) replaces number-in-a-string and the open JSON blobs.
+#   - Three tiers under MonitoringScope, as keyed siblings: static_values, measurements, results.
+#   - MonitoringResult renamed to Measurement (the observed value). "Result" is now a computed output.
+#   - Result composes inputs (a static value, a measurement, or another result) into an output.
+#   - Plans, measurements, results, static values are keyed and referenced, not matched on free text.
+#   - Evidence is a typed object inlined on the input it belongs to (measurement or static value).
+#   - ReportingPeriod is a keyed class, so more than one period can be held and referenced.
+#   - monitoring_parameter is a methodology-scoped string, not a closed forest enum.
+#   - Units live on QuantityValue (UCUM where possible); unit_type/unit_symbol enums removed.
+#   - Removed: the input/output data and variables JSON blobs (the typed tiers replace them).
+# Also since 0.1.0: methodology is a structured {id, version, link}; vintage lives on ReportingPeriod;
+#   measurements are timestamped rather than tied to a period; and change_type, compliance_result, and the
+#   unit_type/unit_symbol picklists were dropped.
+# Forest-specific fields (calculation_worksheet, hwp_worksheet, chain_of_custody, assessment_area) are
+#   retained but flagged with methodology_scope for the pod to decide whether to keep. Location is out of
+#   scope here (covered by CDOP's Location schema).
+# Pairs with the updated workbook. This is a draft for discussion with the pod.
 id: https://clevinson.github.io/cdop-mrv-pod-schema/schema/
 name: mrv_pod
 title: CDOP MRV Pod
 description: >-
-  A shared reference for the CDOP MRV pod's monitoring, reporting and verification
-  data, based on our MRV workbook. Explore the information recorded about a project,
-  its monitoring plans and results, reporting periods, and supporting evidence.
-  Each field describes what information to provide and whether it is required.
-  This is a draft for discussion and refinement with the pod.
-version: 0.1.0
+  A shared reference for the CDOP MRV pod's monitoring, reporting and verification data.
+  A project has reporting context, a verification schedule, and a monitoring scope. The
+  monitoring scope holds monitoring plans, static values, measurements, and results as
+  keyed collections that reference each other. Measurements are observed values, results
+  are computed from measurements and static values, and both carry typed quantities with
+  units. This is a draft for discussion and refinement with the pod.
+version: 0.2.7
 prefixes:
   linkml: https://w3id.org/linkml/
   cdop-mrv: https://clevinson.github.io/cdop-mrv-pod-schema/schema/
@@ -18,8 +36,8 @@ default_range: string
 imports:
   - linkml:types
 
-# Classes and their fields. Spreadsheet metadata is retained as annotations.
-# Visibility/mutability/pre-issuance annotations describe policy; they do not enforce it.
+# Classes and their fields. data_source / public_private / mutability / pre_issuance annotations
+# describe policy; they do not enforce it.
 classes:
 
   # --- Project ---
@@ -27,772 +45,606 @@ classes:
     description: "A project with its reporting context, verification schedule and monitoring scope."
     tree_root: true
     attributes:
-      assessment_area:
-        rank: 1
-        description: >-
-          Eligibility context (Assessment Area / Supersection), if applicable.
+      id:
+        description: "Stable project identifier."
+        identifier: true
         range: string
         annotations:
-          source: "General!B2:L2"
+          data_source: "Registry / Project Developer"
+          public_private: "Public"
+          mutability: "Immutable"
+      assessment_area:
+        description: "Eligibility context (Assessment Area / Supersection), if applicable."
+        range: string
+        annotations:
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Immutable"
           pre_issuance: "Yes"
+          methodology_scope: "forest-specific"
+        notes:
+          - "Assessment Area and Supersection are forest-protocol eligibility terms; this is not a general project location."
+          - "Flagged methodology-specific; proposed for removal pending pod decision."
       reporting:
-        rank: 2
-        description: >-
-          Subfields related to reporting context. Key information pertaining to reporting requirements
-          for the project.
+        description: "Reporting context: periods, preparer, completion date."
         range: ReportingContext
         required: true
         inlined: true
         annotations:
-          source: "General!B3:L3"
           data_source: "Project Developer"
           public_private: "Public / Private"
           mutability: "Mutable"
-          pre_issuance: "Yes (some fields)"
+      reporting_periods:
+        description: "The reporting periods for the project. Results reference one by id."
+        range: ReportingPeriod
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        annotations:
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Immutable"
       verification_schedule:
-        rank: 3
-        description: >-
-          Key dates in the verification process.
+        description: "Key dates in the verification process."
         range: VerificationSchedule
         required: true
         inlined: true
         annotations:
-          source: "General!B4:L4"
           data_source: "Verification Body"
           public_private: "Public"
           mutability: "Mutable"
-          pre_issuance: "No"
       monitoring:
-        rank: 4
-        description: >-
-          Key information pertaining to monitoring requirements, plans, and results for the project.
+        description: "Monitoring plans, static values, measurements and results for the project."
         range: MonitoringScope
         required: true
         inlined: true
         annotations:
-          source: "General!B5:L5"
           data_source: "Project Developer / Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
-          pre_issuance: "Yes (some fields)"
       attestation:
-        rank: 5
         description: >-
-          Optional project attestation. When present, all required Attestation fields must be
-          supplied.
+          Optional project attestation. When present, all required Attestation fields must be supplied.
         range: Attestation
         inlined: true
-        annotations:
-          source: "General!B6:L6"
-      methodology_reference:
-        rank: 6
-        description: >-
-          Methodology and version governing the project and monitoring report, including the
-          methodology identifier and a link where available, e.g., “VM0044 v1.2.”
-        range: string
+      methodology:
+        description: "The methodology governing the project, as identifier and version."
+        range: Methodology
         required: true
+        inlined: true
         annotations:
-          source: "General!B7:L7"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Immutable"
           pre_issuance: "Yes"
+
+  # --- ReportingContext ---
+  ReportingContext:
+    description: "Reporting periods and report preparation details."
+    attributes:
+      current_period:
+        description: "The reporting period this report covers. References a ReportingPeriod by id."
+        range: ReportingPeriod
+        required: true
+        inlined: false
+        annotations:
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Immutable"
+      initial_period:
+        description: "The project's first reporting period. References a ReportingPeriod by id."
+        range: ReportingPeriod
+        required: true
+        inlined: false
+        annotations:
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Immutable"
+      report_preparer:
+        description: "Individual completing the report."
+        range: string
+        required: true
+        annotations:
+          data_source: "Project Developer"
+          public_private: "Private"
+          mutability: "Mutable"
+      report_completion_date:
+        description: "Date the report was completed."
+        range: date
+        required: true
+        annotations:
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
+
+  # --- ReportingPeriod ---
+  ReportingPeriod:
+    description: "A named reporting period. Referenced by results; a project can hold more than one."
+    attributes:
+      id:
+        description: "Stable period identifier."
+        identifier: true
+        range: string
+      label:
+        description: "Human label for the period, e.g. '2026 annual'."
+        range: string
+      date_range:
+        description: "Start and end dates of the monitoring window for the period."
+        range: DateRange
+        required: true
+        inlined: true
+      vintage:
+        description: "The vintage period the outcomes for this period are attributed to. Distinct from the monitoring window."
+        range: DateRange
+        inlined: true
+
+  # --- VerificationSchedule ---
+  VerificationSchedule:
+    description: "Dates of completed and planned verification."
+    attributes:
+      last_verification_date:
+        description: "Completion date of the last verification."
+        range: date
+        required: true
+        annotations:
+          data_source: "Verification Body"
+          public_private: "Public"
+          mutability: "Mutable"
+      next_verification_date:
+        description: "Date of the next planned verification."
+        range: date
+        required: true
+        annotations:
+          data_source: "Project Developer"
+          public_private: "Public"
+          mutability: "Mutable"
 
   # --- Attestation ---
   Attestation:
     description: "Signed attestation by the project proponent."
     attributes:
       signature:
-        rank: 1
-        description: >-
-          Signed attestation by the project proponent.
+        description: "Signed attestation by the project proponent."
         range: uri
         required: true
         annotations:
-          source: "General!B9:L9"
           data_source: "Project Proponent"
           public_private: "Private"
           mutability: "Immutable"
-          pre_issuance: "No"
       signatory_name:
-        rank: 2
-        description: >-
-          Name of the signatory.
+        description: "Name of the signatory."
         range: string
         required: true
         annotations:
-          source: "General!B10:L10"
           data_source: "Project Proponent"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
       signatory_title:
-        rank: 3
-        description: >-
-          Title of the signatory.
+        description: "Title of the signatory."
         range: string
         required: true
         annotations:
-          source: "General!B11:L11"
           data_source: "Project Proponent"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
       signatory_organization:
-        rank: 4
-        description: >-
-          Organization of the signatory.
+        description: "Organization of the signatory."
         range: string
         required: true
         annotations:
-          source: "General!B12:L12"
           data_source: "Project Proponent"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
       date:
-        rank: 5
-        description: >-
-          Date signed.
+        description: "Date signed."
         range: date
         required: true
         annotations:
-          source: "General!B13:L13"
           data_source: "Project Proponent"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
 
   # --- MonitoringScope ---
   MonitoringScope:
-    description: "Monitoring requirements, data, plans and results for a project."
+    description: "Monitoring plans, static values, measurements and results for a project."
     attributes:
       requirement_categories_monitored:
-        rank: 1
-        description: >-
-          Standardized set of protocol requirement categories the project monitors.
+        description: "Standardized set of protocol requirement categories the project monitors."
         range: string
         required: true
         annotations:
-          source: "General!B15:L15"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
       methods_used_to_monitor:
-        rank: 2
-        description: >-
-          Protocol, tools, and methods used to monitor (e.g., CAR Forest Project Protocol v5.x,
-          inventory methodology, iTree Canopy).
+        description: "Protocol, tools, and methods used to monitor."
         range: string
         required: true
         annotations:
-          source: "General!B16:L16"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
-      input_data:
-        rank: 3
-        description: >-
-          The actual measured data, according to the definitions in the input variables
-        range: JsonObject
-        required: true
-        multivalued: true
-        minimum_cardinality: 1
-        inlined: true
-        inlined_as_list: true
-        annotations:
-          source: "General!B17:L17"
-          data_source: "Project Proponent"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
-      output_data:
-        rank: 4
-        description: >-
-          The actual measured data, according to the definitions in the output variables
-        range: JsonObject
-        required: true
-        multivalued: true
-        minimum_cardinality: 1
-        inlined: true
-        inlined_as_list: true
-        annotations:
-          source: "General!B18:L18"
-          data_source: "Project Proponent"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
-      input_variables:
-        rank: 5
-        description: >-
-          Description of the input variables, how they are measured, the accuracy and precision of the
-          measurement system, unit type, and any other information required by the methodology
-        range: JsonObject
-        required: true
-        multivalued: true
-        minimum_cardinality: 1
-        inlined: true
-        inlined_as_list: true
-        annotations:
-          source: "General!B19:L19"
-          data_source: "Project Proponent"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
-      output_variables:
-        rank: 6
-        description: >-
-          Description of the output variables, and their expected statistical variances, and accuracy
-        range: JsonObject
-        required: true
-        multivalued: true
-        minimum_cardinality: 1
-        inlined: true
-        inlined_as_list: true
-        annotations:
-          source: "General!B20:L20"
-          data_source: "Project Proponent"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
       calculation_worksheet:
-        rank: 7
-        description: >-
-          The Annual Monitoring Calculation Worksheet (Excel) that must accompany every monitoring
-          report. Contains all pool calculations, confidence deduction, sequential sampling, secondary
-          effects, and preliminary net GHG.
+        description: "The Annual Monitoring Calculation Worksheet that accompanies the monitoring report."
         range: uri
         annotations:
-          source: "General!B21:L21"
           data_source: "Project Developer"
           public_private: "Private"
           mutability: "Mutable"
-          pre_issuance: "No"
+          methodology_scope: "forest / material-flow specific"
         notes:
-          - "Required (when seeking CRTs)"
-          - Conditional protocol requirements are documented but not enforced by this proof of concept.
+          - "Required when seeking forest-registry credits."
+          - "Flagged methodology-specific; proposed for removal pending pod decision."
       hwp_worksheet:
-        rank: 8
-        description: >-
-          The Harvested Wood Products Worksheet required by the protocol.
+        description: "The Harvested Wood Products worksheet required by a forest protocol."
         range: uri
         annotations:
-          source: "General!B22:L22"
           data_source: "Project Developer"
           public_private: "Private"
           mutability: "Mutable"
-          pre_issuance: "No"
+          methodology_scope: "forest-specific"
         notes:
-          - Conditional protocol requirements are documented but not enforced by this proof of concept.
+          - "Flagged methodology-specific; proposed for removal pending pod decision."
       chain_of_custody_and_application_evidence:
-        rank: 9
-        description: "Documents tracing the monitored material from feedstock sourcing through production and final application. "
+        description: >-
+          Documents tracing the monitored material from feedstock sourcing through production and final application.
         range: uri
         multivalued: true
         annotations:
-          source: "General!B23:L23"
           data_source: "Project Developer"
           public_private: "Private"
           mutability: "Mutable"
-          pre_issuance: "Yes"
+          methodology_scope: "material-flow specific"
         notes:
-          - "Required where applicable"
-          - Conditional protocol requirements are documented but not enforced by this proof of concept.
+          - "Required where applicable."
+          - "Flagged methodology-specific; proposed for removal pending pod decision."
       monitoring_plans:
-        rank: 10
-        description: >-
-          Monitoring plans for the project, one record per monitoring parameter.
+        description: "Monitoring plans, one per monitored parameter. Keyed; referenced by measurements and results."
         range: MonitoringPlan
         multivalued: true
         inlined: true
         inlined_as_list: true
-        annotations:
-          source: "General!B24:L24"
-      monitoring_results:
-        rank: 11
-        description: >-
-          Monitoring results for the reporting period, one record per monitoring parameter.
-        range: MonitoringResult
+      static_values:
+        description: "Fixed inputs that are not measured each period: methodology constants and defaults, and ex-ante parameters including baseline. Keyed; referenced by results."
+        range: StaticValue
         multivalued: true
         inlined: true
         inlined_as_list: true
-        annotations:
-          source: "General!B25:L25"
-
-  # --- ReportingContext ---
-  ReportingContext:
-    description: "Reporting periods and report preparation details."
-    attributes:
-      reporting_period:
-        rank: 1
-        description: >-
-          Current reporting period (start-end).
-        range: DateRange
-        required: true
+      measurements:
+        description: "Observed values for a monitored parameter, each timestamped. Keyed; reference a plan."
+        range: Measurement
+        multivalued: true
         inlined: true
-        annotations:
-          source: "General!B27:L27"
-          data_source: "Project Developer"
-          public_private: "Public"
-          mutability: "Immutable"
-          pre_issuance: "No"
-      initial_reporting_period:
-        rank: 2
-        description: >-
-          First reporting period (start-end).
-        range: DateRange
-        required: true
+        inlined_as_list: true
+      results:
+        description: "Computed outputs. Each is produced from inputs that are static values, measurements, or other results."
+        range: Result
+        multivalued: true
         inlined: true
-        annotations:
-          source: "General!B28:L28"
-          data_source: "Project Developer"
-          public_private: "Public"
-          mutability: "Immutable"
-          pre_issuance: "Yes"
-      report_preparer:
-        rank: 3
-        description: >-
-          Individual completing the report.
-        range: string
-        required: true
-        annotations:
-          source: "General!B29:L29"
-          data_source: "Project Developer"
-          public_private: "Private"
-          mutability: "Mutable"
-          pre_issuance: "No"
-      report_completion_date:
-        rank: 4
-        description: >-
-          Date the report was completed.
-        range: date
-        required: true
-        annotations:
-          source: "General!B30:L30"
-          data_source: "Project Developer"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
-
-  # --- VerificationSchedule ---
-  VerificationSchedule:
-    description: "Dates of completed and planned site-visit verification."
-    attributes:
-      last_verification_date:
-        rank: 1
-        description: >-
-          Completion date of the last site-visit verification.
-        range: date
-        required: true
-        annotations:
-          source: "General!B32:L32"
-          data_source: "Verification Body"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
-      next_verification_date:
-        rank: 2
-        description: >-
-          Date of the next planned site-visit verification.
-        range: date
-        required: true
-        annotations:
-          source: "General!B33:L33"
-          data_source: "Project Developer"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
+        inlined_as_list: true
 
   # --- MonitoringPlan ---
   MonitoringPlan:
-    description: "The monitoring plan for one protocol requirement or carbon metric."
+    description: "The monitoring plan for one protocol requirement or carbon metric. Stands on its own so it can be referenced across project phases without being restated."
     attributes:
+      id:
+        description: "Stable plan identifier. Referenced by measurements and results."
+        identifier: true
+        range: string
       monitoring_parameter:
-        rank: 1
         description: >-
-          The specific protocol requirement or carbon metric being monitored. Drives every field
-          below.
-        range: MonitoringParameter
+          The parameter being monitored, as the methodology's own parameter key or name. Not a
+          closed CDOP list; sourced from the methodology.
+        range: string
         required: true
         annotations:
-          source: "Monitoring Plan!B2:L2"
           data_source: "Project Developer"
           public_private: "Public"
           mutability: "Mutable"
           pre_issuance: "Yes"
-      overview_of_status_for_picklist_value:
-        rank: 2
-        description: >-
-          Description of the project's status and approach for the selected parameter
-          (picklist_value).
+      overview_of_status:
+        description: "Description of the project's status and approach for this parameter."
         range: string
         annotations:
-          source: "Monitoring Plan!B3:L3"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
-      approach_to_monitor_picklist_value:
-        rank: 3
-        description: >-
-          The measuring and monitoring plan for the selected parameter (picklist_value).
+      approach_to_monitor:
+        description: "The measuring and monitoring plan for this parameter."
         range: string
         annotations:
-          source: "Monitoring Plan!B4:L4"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
       indicator_id:
-        rank: 4
-        description: >-
-          Unique ID distinguishing indicators within one parameter (e.g. each carbon pool, each risk
-          category, hwp_actual, secondary_effects_total, buffer_contribution_qty, etc.).
+        description: "IDs distinguishing indicators within one parameter (e.g. each pool, each risk category)."
         range: string
         multivalued: true
         annotations:
-          source: "Monitoring Plan!B5:L5"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
-      unit_description:
-        rank: 5
-        description: >-
-          The unit used to track the indicator (e.g. 'tonnes CO2e in the standing live pool', 'tCO2e
-          in harvested wood products', 'm³ delivered to mills').
+      expected_unit:
+        description: "The unit the indicator is expected to be reported in (UCUM where possible). Measured values carry the actual unit on their QuantityValue."
         range: string
-        multivalued: true
         annotations:
-          source: "Monitoring Plan!B6:L6"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
-      unit_type:
-        rank: 6
-        description: >-
-          The metric type used to quantify the indicator.
-        range: UnitType
-        multivalued: true
-        annotations:
-          source: "Monitoring Plan!B7:L7"
-          data_source: "Project Developer"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
-      unit_symbol:
-        rank: 7
-        description: >-
-          Derived from unit_type; the symbol representing the unit.
-        range: UnitSymbol
-        multivalued: true
-        annotations:
-          source: "Monitoring Plan!B8:L8"
-          data_source: "Project Developer"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
-        notes:
-          - The workbook does not define a complete unit_type-to-symbol mapping; no automatic derivation is performed.
       monitoring_frequency:
-        rank: 8
-        description: >-
-          How often the indicator is measured.
+        description: "How often the indicator is measured."
         range: MonitoringFrequency
         multivalued: true
         annotations:
-          source: "Monitoring Plan!B9:L9"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
-      baseline_or_prior_value:
-        rank: 9
-        description: >-
-          Baseline or prior-reporting-period reference value for the indicator.
-        range: string
-        multivalued: true
-        annotations:
-          source: "Monitoring Plan!B10:L10"
-          data_source: "Project Developer"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
       required_threshold:
-        rank: 10
-        description: >-
-          Protocol threshold the indicator is measured against (e.g. '>=95%', '>=40% canopy', 'N/A',
-          'If risk rating increased').
+        description: "Protocol threshold the indicator is measured against (e.g. '>=95%', 'N/A')."
         range: string
         multivalued: true
         annotations:
-          source: "Monitoring Plan!B11:L11"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
       supporting_evidence:
-        rank: 11
-        description: >-
-          Documentation supporting the plan (e.g., inventory report, management plan, certificate).
-        range: uri
+        description: "Evidence supporting the plan (e.g. inventory report, management plan, certificate)."
+        range: Evidence
         multivalued: true
-        annotations:
-          source: "Monitoring Plan!B12:L12"
-          data_source: "Project Developer"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
+        inlined: true
+        inlined_as_list: true
       equation_reference:
-        rank: 12
         description: >-
-          Methodology equation or equations in which the indicator is used as an input or produced as
-          an output, e.g., “Equation 2” or “Equations 2, 3, 6 and 9.”
+          Methodology equation(s) in which the indicator is used as an input or produced as an output.
         range: string
         multivalued: true
         annotations:
-          source: "Monitoring Plan!B13:L13"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
-          picklist_options: "—"
       source_of_data:
-        rank: 13
         description: >-
-          Origin of the data used for the indicator, such as on-site measurements, laboratory
-          analysis, production records, invoices, third-party records or an approved methodology
-          default.
+          Origin of the data used for the indicator (on-site measurement, lab, records, methodology default, etc.).
         range: string
         required: true
         multivalued: true
         minimum_cardinality: 1
         annotations:
-          source: "Monitoring Plan!B14:L14"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
-          picklist_options: "—"
       qa_qc_procedures:
-        rank: 14
-        description: >-
-          Procedures used to confirm the accuracy, completeness and integrity of the indicator,
-          including equipment calibration, laboratory accreditation, reconciliation to invoices or
-          inventories, data-integrity checks and corrective procedures.
+        description: "Procedures used to confirm accuracy, completeness and integrity of the indicator."
         range: string
         required: true
         annotations:
-          source: "Monitoring Plan!B15:L15"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
-          picklist_options: "—"
       purpose_of_data:
-        rank: 15
-        description: >-
-          Reason the indicator is required under the methodology, such as demonstrating eligibility,
-          establishing the baseline, calculating project emissions, calculating leakage or determining
-          net reductions and removals.
+        description: "Reason the indicator is required under the methodology."
         range: string
         required: true
         multivalued: true
         minimum_cardinality: 1
         annotations:
-          source: "Monitoring Plan!B16:L16"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
       calculation_method:
-        rank: 16
-        description: >-
-          Formula, external tool or procedure used to convert the source data into the monitored
-          indicator or calculated result, including any methodology defaults or assumptions applied.
+        description: "Described method or procedure used to convert source data into the indicator or result. Computed results are modeled explicitly in Result."
         range: string
         annotations:
-          source: "Monitoring Plan!B17:L17"
           data_source: "Project Developer"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "Yes"
 
-  # --- MonitoringResult ---
-  MonitoringResult:
-    description: "Results for one monitored parameter in the current reporting period."
+  # --- StaticValue ---
+  StaticValue:
+    description: >-
+      A fixed input that is not measured each period. Methodology constants and defaults, and ex-ante
+      project parameters set at validation, including baseline. Carries source and validity.
     attributes:
-      monitoring_parameter:
-        rank: 1
-        description: >-
-          The parameter being reported on this period. Links to the Monitoring Plan.
-        range: MonitoringParameter
+      id:
+        description: "Stable identifier. Referenced by results as an input."
+        identifier: true
+        range: string
+      label:
+        description: "What this value is, e.g. 'net calorific value of fuel' or 'baseline fuel use'."
+        range: string
+        required: true
+      parameter:
+        description: "Optional methodology parameter key this value relates to."
+        range: string
+      value:
+        description: "The typed value and its unit."
+        range: QuantityValue
+        required: true
+      kind:
+        description: "Whether this is a methodology default, an ex-ante parameter, or a baseline."
+        range: StaticValueKind
+        annotations:
+          public_private: "Public"
+      source:
+        description: "Where the value comes from, e.g. a named methodology tool and version."
+        range: string
+        annotations:
+          data_source: "Project Developer"
+          public_private: "Public"
+      valid_from:
+        description: "Start of the validity period for this value, where applicable."
+        range: date
+      valid_to:
+        description: "End of the validity period for this value, where applicable."
+        range: date
+      evidence:
+        description: "Evidence backing this value, inlined."
+        range: Evidence
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+
+  # --- Measurement ---
+  Measurement:
+    description: "An observed value for a monitored parameter at a point in time. Was MonitoringResult in 0.1.0."
+    attributes:
+      id:
+        description: "Stable identifier. Referenced by results as an input."
+        identifier: true
+        range: string
+      plan:
+        description: "The monitoring plan this measures. References a MonitoringPlan by id."
+        range: MonitoringPlan
+        required: true
+        inlined: false
+      indicator_id:
+        description: "Which indicator within the plan this measures, where a plan has several."
+        range: string
+      timestamp:
+        description: "When the measurement was taken. The reporting period it falls in is derivable from this."
+        range: datetime
         required: true
         annotations:
-          source: "Monitoring Result!B2:L2"
-          data_source: "Project Developer"
+          data_source: "Project Proponent"
+          public_private: "Public"
+      value:
+        description: "The measured value and its unit."
+        range: QuantityValue
+        required: true
+        annotations:
+          data_source: "Project Proponent"
           public_private: "Public"
           mutability: "Mutable"
-          pre_issuance: "No"
-      indicator_id:
-        rank: 2
-        description: >-
-          Links this result to a Monitoring Plan indicator (same ID). Examples: hwp_actual,
-          hwp_baseline, harvest_volume, secondary_effects_total, buffer_contribution_qty, net_ghg,
-          live_10yr_decline_expl, etc.
+      source:
+        description: "Origin of this measurement (device, survey, record)."
         range: string
-        multivalued: true
         annotations:
-          source: "Monitoring Result!B3:L3"
-          data_source: "Project Developer"
+          data_source: "Project Proponent"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
-      monitored_value_for_picklist_value:
-        rank: 3
-        description: >-
-          Actual measured value for the indicator this reporting period. For quantitative indicators
-          use the number + unit (e.g. 12500 tCO2e). For text/narrative indicators put the full text
-          here or in narrative_or_explanation.
+      note:
+        description: "Optional narrative about the observation."
         range: string
+      evidence:
+        description: "Evidence backing this measurement, inlined."
+        range: Evidence
         multivalued: true
-        annotations:
-          source: "Monitoring Result!B4:L4"
-          data_source: "Project Developer / Verification Body / Registry"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
-      compliance_result:
-        rank: 4
-        description: >-
-          Whether the indicator meets its protocol requirement this period. Picklist: Met | Not met |
-          In progress | N/A
-        range: ComplianceResult
+        inlined: true
+        inlined_as_list: true
+
+  # --- Result ---
+  Result:
+    description: >-
+      A computed output. Produced from inputs, where an input is a static value, a measurement, or
+      another result. Chaining results expresses intermediate steps (e.g. baseline emissions, project
+      emissions, leakage) up to a final value.
+    attributes:
+      id:
+        description: "Stable identifier. May be referenced as an input by other results."
+        identifier: true
+        range: string
+      label:
+        description: "What this result is, e.g. 'baseline emissions' or 'net emission reductions'."
+        range: string
+        required: true
+      parameter:
+        description: "Optional methodology parameter key this result corresponds to."
+        range: string
+      period:
+        description: "The reporting period this result is for. References a ReportingPeriod by id."
+        range: ReportingPeriod
+        inlined: false
+      inputs:
+        description: "The inputs consumed to produce the output."
+        range: ResultInput
         multivalued: true
+        inlined: true
+        inlined_as_list: true
+      output:
+        description: "The computed value and its unit."
+        range: QuantityValue
+        required: true
         annotations:
-          source: "Monitoring Result!B5:L5"
-          data_source: "Project Developer / Verification Body / Registry"
+          data_source: "Project Proponent"
           public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
-      change_type:
-        rank: 5
-        description: >-
-          How change vs baseline/prior is expressed - only when unit_type is Change.
-        range: ChangeType
-        multivalued: true
-        annotations:
-          source: "Monitoring Result!B6:L6"
-          data_source: "Project Developer / Verification Body / Registry"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
+      equation_reference:
+        description: "The methodology equation this result applies."
+        range: string
       narrative_or_explanation:
-        rank: 6
-        description: >-
-          Required narrative for this result (e.g. ownership-change details, reversal nature, progress
-          explanation, 10-year standing-live decline explanation, HWP calculation notes,
-          secondary-effects methodology notes).
+        description: "Narrative for this result."
         range: string
-        multivalued: true
-        annotations:
-          source: "Monitoring Result!B7:L7"
-          data_source: "Project Developer / Verification Body / Registry"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
-      supporting_evidence:
-        rank: 7
-        description: >-
-          Documentation supporting the ex-post result (e.g. Monitoring Report, Calculation Worksheet,
-          HWP Worksheet, satellite images, recorded deeds, mill affidavits, GIS files).
-        range: uri
-        multivalued: true
-        annotations:
-          source: "Monitoring Result!B8:L8"
-          data_source: "Project Developer / Verification Body / Registry"
-          public_private: "Public"
-          mutability: "Mutable"
-          pre_issuance: "No"
+
+  # --- ResultInput ---
+  ResultInput:
+    description: "One input to a Result: a reference to a static value, a measurement, or another result."
+    attributes:
+      kind:
+        description: "Which kind of thing this input references."
+        range: InputKind
+        required: true
+      ref:
+        description: "The id of the referenced StaticValue, Measurement, or Result."
+        range: string
+        required: true
+      variable:
+        description: "Optional role this input plays in the equation, e.g. the methodology symbol."
+        range: string
+
+  # --- Evidence ---
+  Evidence:
+    description: "A typed piece of evidence, inlined on the measurement or static value it backs."
+    attributes:
+      kind:
+        description: "The kind of evidence."
+        range: EvidenceKind
+        required: true
+      reference:
+        description: "A uri for a file, or an id or locator for a stream or record. Read according to kind."
+        range: string
+        required: true
+      description:
+        description: "What the evidence is."
+        range: string
+      collected_at:
+        description: "When the evidence was captured or produced."
+        range: datetime
+      hash:
+        description: "Optional integrity hash of the referenced evidence."
+        range: string
+
+  # --- QuantityValue ---
+  QuantityValue:
+    description: "A typed numeric value with its unit."
+    attributes:
+      value:
+        description: "The numeric value."
+        range: decimal
+        required: true
+      unit:
+        description: "The unit, as a UCUM code where possible, otherwise a methodology-declared unit."
+        range: string
+        required: true
 
   # --- DateRange ---
   DateRange:
-    description: "A reporting period represented by start and end dates. Chronological ordering is not validated."
+    description: "A date range. Chronological ordering is not validated."
     attributes:
       start_date:
-        rank: 1
-        description: >-
-          Start date of the reporting period.
+        description: "Start date."
         range: date
         required: true
-        annotations:
-          source: "General!B35:L35"
       end_date:
-        rank: 2
-        description: >-
-          End date of the reporting period.
+        description: "End date."
         range: date
         required: true
-        annotations:
-          source: "General!B36:L36"
 
-  # --- Open JSON objects used in the input/output arrays ---
-  JsonObject:
-    description: An object with arbitrary JSON keys and values; internal structure is not yet specified.
-    extra_slots:
-      allowed: true
-    notes:
-      - LinkML 1.11.1 does not yet emit extra_slots in JSON Schema. The Makefile applies this one setting to the generated definition.
+  # --- Methodology ---
+  Methodology:
+    description: "A methodology identity and version."
+    attributes:
+      id:
+        description: "Methodology identifier, e.g. VM0044."
+        range: string
+        required: true
+      version:
+        description: "Methodology version, e.g. 1.2."
+        range: string
+        required: true
+      link:
+        description: "Link to the methodology, where available."
+        range: uri
 
-# Picklists — values preserved exactly as written in the workbook.
+# Enums. Bounded, cross-methodology vocabularies. Parameter and unit vocabularies are NOT enumerated
+# here; parameters come from the methodology and units live on QuantityValue.
 enums:
-  MonitoringParameter:
-    description: "Allowed MonitoringParameter values from the workbook."
-    permissible_values:
-      "Forest ownership": {}
-      "Native species composition": {}
-      "Sustainable management": {}
-      "Structural elements (dead wood)": {}
-      "Age-class distribution": {}
-      "Canopy cover": {}
-      "Carbon stocks": {}
-      "Inventory methodology": {}
-      "Permanence / reversal": {}
-      "Reversal risk rating": {}
-      "Buffer pool": {}
-      "CRT issuance / verification": {}
-      "Harvested Wood Products": {}
-      "Secondary Effects": {}
-      "Net GHG Calculation": {}
-  UnitType:
-    description: "Allowed UnitType values from the workbook."
-    permissible_values:
-      "Count": {}
-      "Percentage": {}
-      "Area": {}
-      "Mass (CO2e)": {}
-      "Value": {}
-      "Change": {}
-      "Binary": {}
-      "Date": {}
-  UnitSymbol:
-    description: "Allowed UnitSymbol values from the workbook."
-    permissible_values:
-      "#": {}
-      "%": {}
-      "ha / acres": {}
-      "tCO2e": {}
-      "USD": {}
-      "Δ": {}
-      "Y/N": {}
   MonitoringFrequency:
-    description: "Allowed MonitoringFrequency values from the workbook."
+    description: "How often an indicator is measured."
     permissible_values:
       "Continuous": {}
       "Annually": {}
@@ -801,17 +653,25 @@ enums:
       "Every 12 periods": {}
       "Sporadically": {}
       "Other": {}
-  ComplianceResult:
-    description: "Allowed ComplianceResult values from the workbook."
+  InputKind:
+    description: "The kind of thing a ResultInput references."
     permissible_values:
-      "Met": {}
-      "Not met": {}
-      "In progress": {}
-      "N/A": {}
-  ChangeType:
-    description: "Allowed ChangeType values from the workbook."
+      "static": { description: "A StaticValue." }
+      "measurement": { description: "A Measurement." }
+      "result": { description: "Another Result." }
+  StaticValueKind:
+    description: "The kind of static value."
     permissible_values:
-      "Absolute": {}
-      "Relative": {}
-      "Index": {}
-      "Other": {}
+      "methodology_default": { description: "A constant or default fixed by the methodology." }
+      "ex_ante_parameter": { description: "A project parameter set once at validation." }
+      "baseline": { description: "A baseline value." }
+  EvidenceKind:
+    description: "The kind of evidence. Starter set; extend as needed."
+    permissible_values:
+      "document": {}
+      "sensor_stream": {}
+      "survey_response": {}
+      "lab_result": {}
+      "photograph": {}
+      "external_record": {}
+      "attestation": {}

@@ -1,0 +1,850 @@
+{
+    "$defs": {
+        "Attestation": {
+            "additionalProperties": false,
+            "description": "Signed attestation by the project proponent.",
+            "properties": {
+                "date": {
+                    "description": "Date signed.",
+                    "format": "date",
+                    "type": "string"
+                },
+                "signatory_name": {
+                    "description": "Name of the signatory.",
+                    "type": "string"
+                },
+                "signatory_organization": {
+                    "description": "Organization of the signatory.",
+                    "type": "string"
+                },
+                "signatory_title": {
+                    "description": "Title of the signatory.",
+                    "type": "string"
+                },
+                "signature": {
+                    "description": "Signed attestation by the project proponent.",
+                    "format": "uri",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "signature",
+                "signatory_name",
+                "signatory_title",
+                "signatory_organization",
+                "date"
+            ],
+            "title": "Attestation",
+            "type": "object"
+        },
+        "DateRange": {
+            "additionalProperties": false,
+            "description": "A date range. Chronological ordering is not validated.",
+            "properties": {
+                "end_date": {
+                    "description": "End date.",
+                    "format": "date",
+                    "type": "string"
+                },
+                "start_date": {
+                    "description": "Start date.",
+                    "format": "date",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "start_date",
+                "end_date"
+            ],
+            "title": "DateRange",
+            "type": "object"
+        },
+        "Evidence": {
+            "additionalProperties": false,
+            "description": "A typed piece of evidence, inlined on the measurement or static value it backs.",
+            "properties": {
+                "collected_at": {
+                    "description": "When the evidence was captured or produced.",
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "What the evidence is.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hash": {
+                    "description": "Optional integrity hash of the referenced evidence.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "kind": {
+                    "$ref": "#/$defs/EvidenceKind",
+                    "description": "The kind of evidence."
+                },
+                "reference": {
+                    "description": "A uri for a file, or an id or locator for a stream or record. Read according to kind.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind",
+                "reference"
+            ],
+            "title": "Evidence",
+            "type": "object"
+        },
+        "EvidenceKind": {
+            "description": "The kind of evidence. Starter set; extend as needed.",
+            "enum": [
+                "document",
+                "sensor_stream",
+                "survey_response",
+                "lab_result",
+                "photograph",
+                "external_record",
+                "attestation"
+            ],
+            "title": "EvidenceKind",
+            "type": "string"
+        },
+        "InputKind": {
+            "description": "The kind of thing a ResultInput references.",
+            "enum": [
+                "static",
+                "measurement",
+                "result"
+            ],
+            "title": "InputKind",
+            "type": "string"
+        },
+        "Measurement": {
+            "additionalProperties": false,
+            "description": "An observed value for a monitored parameter at a point in time. Was MonitoringResult in 0.1.0.",
+            "properties": {
+                "evidence": {
+                    "description": "Evidence backing this measurement, inlined.",
+                    "items": {
+                        "$ref": "#/$defs/Evidence"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Stable identifier. Referenced by results as an input.",
+                    "type": "string"
+                },
+                "indicator_id": {
+                    "description": "Which indicator within the plan this measures, where a plan has several.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "note": {
+                    "description": "Optional narrative about the observation.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "plan": {
+                    "description": "The monitoring plan this measures. References a MonitoringPlan by id.",
+                    "type": "string"
+                },
+                "source": {
+                    "description": "Origin of this measurement (device, survey, record).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "timestamp": {
+                    "description": "When the measurement was taken. The reporting period it falls in is derivable from this.",
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "value": {
+                    "$ref": "#/$defs/QuantityValue",
+                    "description": "The measured value and its unit."
+                }
+            },
+            "required": [
+                "id",
+                "plan",
+                "timestamp",
+                "value"
+            ],
+            "title": "Measurement",
+            "type": "object"
+        },
+        "Methodology": {
+            "additionalProperties": false,
+            "description": "A methodology identity and version.",
+            "properties": {
+                "id": {
+                    "description": "Methodology identifier, e.g. VM0044.",
+                    "type": "string"
+                },
+                "link": {
+                    "description": "Link to the methodology, where available.",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "version": {
+                    "description": "Methodology version, e.g. 1.2.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "version"
+            ],
+            "title": "Methodology",
+            "type": "object"
+        },
+        "MonitoringFrequency": {
+            "description": "How often an indicator is measured.",
+            "enum": [
+                "Continuous",
+                "Annually",
+                "Per reporting period",
+                "Every site visit",
+                "Every 12 periods",
+                "Sporadically",
+                "Other"
+            ],
+            "title": "MonitoringFrequency",
+            "type": "string"
+        },
+        "MonitoringPlan": {
+            "additionalProperties": false,
+            "description": "The monitoring plan for one protocol requirement or carbon metric. Stands on its own so it can be referenced across project phases without being restated.",
+            "properties": {
+                "approach_to_monitor": {
+                    "description": "The measuring and monitoring plan for this parameter.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "calculation_method": {
+                    "description": "Described method or procedure used to convert source data into the indicator or result. Computed results are modeled explicitly in Result.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "equation_reference": {
+                    "description": "Methodology equation(s) in which the indicator is used as an input or produced as an output.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "expected_unit": {
+                    "description": "The unit the indicator is expected to be reported in (UCUM where possible). Measured values carry the actual unit on their QuantityValue.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Stable plan identifier. Referenced by measurements and results.",
+                    "type": "string"
+                },
+                "indicator_id": {
+                    "description": "IDs distinguishing indicators within one parameter (e.g. each pool, each risk category).",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "monitoring_frequency": {
+                    "description": "How often the indicator is measured.",
+                    "items": {
+                        "$ref": "#/$defs/MonitoringFrequency"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "monitoring_parameter": {
+                    "description": "The parameter being monitored, as the methodology's own parameter key or name. Not a closed CDOP list; sourced from the methodology.",
+                    "type": "string"
+                },
+                "overview_of_status": {
+                    "description": "Description of the project's status and approach for this parameter.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "purpose_of_data": {
+                    "description": "Reason the indicator is required under the methodology.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                },
+                "qa_qc_procedures": {
+                    "description": "Procedures used to confirm accuracy, completeness and integrity of the indicator.",
+                    "type": "string"
+                },
+                "required_threshold": {
+                    "description": "Protocol threshold the indicator is measured against (e.g. '>=95%', 'N/A').",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "source_of_data": {
+                    "description": "Origin of the data used for the indicator (on-site measurement, lab, records, methodology default, etc.).",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                },
+                "supporting_evidence": {
+                    "description": "Evidence supporting the plan (e.g. inventory report, management plan, certificate).",
+                    "items": {
+                        "$ref": "#/$defs/Evidence"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "id",
+                "monitoring_parameter",
+                "source_of_data",
+                "qa_qc_procedures",
+                "purpose_of_data"
+            ],
+            "title": "MonitoringPlan",
+            "type": "object"
+        },
+        "MonitoringScope": {
+            "additionalProperties": false,
+            "description": "Monitoring plans, static values, measurements and results for a project.",
+            "properties": {
+                "calculation_worksheet": {
+                    "description": "The Annual Monitoring Calculation Worksheet that accompanies the monitoring report.",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "chain_of_custody_and_application_evidence": {
+                    "description": "Documents tracing the monitored material from feedstock sourcing through production and final application.",
+                    "items": {
+                        "format": "uri",
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "hwp_worksheet": {
+                    "description": "The Harvested Wood Products worksheet required by a forest protocol.",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "measurements": {
+                    "description": "Observed values for a monitored parameter, each timestamped. Keyed; reference a plan.",
+                    "items": {
+                        "$ref": "#/$defs/Measurement"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "methods_used_to_monitor": {
+                    "description": "Protocol, tools, and methods used to monitor.",
+                    "type": "string"
+                },
+                "monitoring_plans": {
+                    "description": "Monitoring plans, one per monitored parameter. Keyed; referenced by measurements and results.",
+                    "items": {
+                        "$ref": "#/$defs/MonitoringPlan"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "requirement_categories_monitored": {
+                    "description": "Standardized set of protocol requirement categories the project monitors.",
+                    "type": "string"
+                },
+                "results": {
+                    "description": "Computed outputs. Each is produced from inputs that are static values, measurements, or other results.",
+                    "items": {
+                        "$ref": "#/$defs/Result"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "static_values": {
+                    "description": "Fixed inputs that are not measured each period: methodology constants and defaults, and ex-ante parameters including baseline. Keyed; referenced by results.",
+                    "items": {
+                        "$ref": "#/$defs/StaticValue"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "requirement_categories_monitored",
+                "methods_used_to_monitor"
+            ],
+            "title": "MonitoringScope",
+            "type": "object"
+        },
+        "Project": {
+            "additionalProperties": false,
+            "description": "A project with its reporting context, verification schedule and monitoring scope.",
+            "properties": {
+                "assessment_area": {
+                    "description": "Eligibility context (Assessment Area / Supersection), if applicable.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "attestation": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Attestation"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Optional project attestation. When present, all required Attestation fields must be supplied."
+                },
+                "id": {
+                    "description": "Stable project identifier.",
+                    "type": "string"
+                },
+                "methodology": {
+                    "$ref": "#/$defs/Methodology",
+                    "description": "The methodology governing the project, as identifier and version."
+                },
+                "monitoring": {
+                    "$ref": "#/$defs/MonitoringScope",
+                    "description": "Monitoring plans, static values, measurements and results for the project."
+                },
+                "reporting": {
+                    "$ref": "#/$defs/ReportingContext",
+                    "description": "Reporting context: periods, preparer, completion date."
+                },
+                "reporting_periods": {
+                    "description": "The reporting periods for the project. Results reference one by id.",
+                    "items": {
+                        "$ref": "#/$defs/ReportingPeriod"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "verification_schedule": {
+                    "$ref": "#/$defs/VerificationSchedule",
+                    "description": "Key dates in the verification process."
+                }
+            },
+            "required": [
+                "id",
+                "reporting",
+                "verification_schedule",
+                "monitoring",
+                "methodology"
+            ],
+            "title": "Project",
+            "type": "object"
+        },
+        "QuantityValue": {
+            "additionalProperties": false,
+            "description": "A typed numeric value with its unit.",
+            "properties": {
+                "unit": {
+                    "description": "The unit, as a UCUM code where possible, otherwise a methodology-declared unit.",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "The numeric value.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "value",
+                "unit"
+            ],
+            "title": "QuantityValue",
+            "type": "object"
+        },
+        "ReportingContext": {
+            "additionalProperties": false,
+            "description": "Reporting periods and report preparation details.",
+            "properties": {
+                "current_period": {
+                    "description": "The reporting period this report covers. References a ReportingPeriod by id.",
+                    "type": "string"
+                },
+                "initial_period": {
+                    "description": "The project's first reporting period. References a ReportingPeriod by id.",
+                    "type": "string"
+                },
+                "report_completion_date": {
+                    "description": "Date the report was completed.",
+                    "format": "date",
+                    "type": "string"
+                },
+                "report_preparer": {
+                    "description": "Individual completing the report.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "current_period",
+                "initial_period",
+                "report_preparer",
+                "report_completion_date"
+            ],
+            "title": "ReportingContext",
+            "type": "object"
+        },
+        "ReportingPeriod": {
+            "additionalProperties": false,
+            "description": "A named reporting period. Referenced by results; a project can hold more than one.",
+            "properties": {
+                "date_range": {
+                    "$ref": "#/$defs/DateRange",
+                    "description": "Start and end dates of the monitoring window for the period."
+                },
+                "id": {
+                    "description": "Stable period identifier.",
+                    "type": "string"
+                },
+                "label": {
+                    "description": "Human label for the period, e.g. '2026 annual'.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "vintage": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/DateRange"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "The vintage period the outcomes for this period are attributed to. Distinct from the monitoring window."
+                }
+            },
+            "required": [
+                "id",
+                "date_range"
+            ],
+            "title": "ReportingPeriod",
+            "type": "object"
+        },
+        "Result": {
+            "additionalProperties": false,
+            "description": "A computed output. Produced from inputs, where an input is a static value, a measurement, or another result. Chaining results expresses intermediate steps (e.g. baseline emissions, project emissions, leakage) up to a final value.",
+            "properties": {
+                "equation_reference": {
+                    "description": "The methodology equation this result applies.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Stable identifier. May be referenced as an input by other results.",
+                    "type": "string"
+                },
+                "inputs": {
+                    "description": "The inputs consumed to produce the output.",
+                    "items": {
+                        "$ref": "#/$defs/ResultInput"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "label": {
+                    "description": "What this result is, e.g. 'baseline emissions' or 'net emission reductions'.",
+                    "type": "string"
+                },
+                "narrative_or_explanation": {
+                    "description": "Narrative for this result.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "output": {
+                    "$ref": "#/$defs/QuantityValue",
+                    "description": "The computed value and its unit."
+                },
+                "parameter": {
+                    "description": "Optional methodology parameter key this result corresponds to.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "period": {
+                    "description": "The reporting period this result is for. References a ReportingPeriod by id.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "id",
+                "label",
+                "output"
+            ],
+            "title": "Result",
+            "type": "object"
+        },
+        "ResultInput": {
+            "additionalProperties": false,
+            "description": "One input to a Result: a reference to a static value, a measurement, or another result.",
+            "properties": {
+                "kind": {
+                    "$ref": "#/$defs/InputKind",
+                    "description": "Which kind of thing this input references."
+                },
+                "ref": {
+                    "description": "The id of the referenced StaticValue, Measurement, or Result.",
+                    "type": "string"
+                },
+                "variable": {
+                    "description": "Optional role this input plays in the equation, e.g. the methodology symbol.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "kind",
+                "ref"
+            ],
+            "title": "ResultInput",
+            "type": "object"
+        },
+        "StaticValue": {
+            "additionalProperties": false,
+            "description": "A fixed input that is not measured each period. Methodology constants and defaults, and ex-ante project parameters set at validation, including baseline. Carries source and validity.",
+            "properties": {
+                "evidence": {
+                    "description": "Evidence backing this value, inlined.",
+                    "items": {
+                        "$ref": "#/$defs/Evidence"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Stable identifier. Referenced by results as an input.",
+                    "type": "string"
+                },
+                "kind": {
+                    "$ref": "#/$defs/StaticValueKind",
+                    "description": "Whether this is a methodology default, an ex-ante parameter, or a baseline."
+                },
+                "label": {
+                    "description": "What this value is, e.g. 'net calorific value of fuel' or 'baseline fuel use'.",
+                    "type": "string"
+                },
+                "parameter": {
+                    "description": "Optional methodology parameter key this value relates to.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source": {
+                    "description": "Where the value comes from, e.g. a named methodology tool and version.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "valid_from": {
+                    "description": "Start of the validity period for this value, where applicable.",
+                    "format": "date",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "valid_to": {
+                    "description": "End of the validity period for this value, where applicable.",
+                    "format": "date",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "value": {
+                    "$ref": "#/$defs/QuantityValue",
+                    "description": "The typed value and its unit."
+                }
+            },
+            "required": [
+                "id",
+                "label",
+                "value"
+            ],
+            "title": "StaticValue",
+            "type": "object"
+        },
+        "StaticValueKind": {
+            "description": "The kind of static value.",
+            "enum": [
+                "methodology_default",
+                "ex_ante_parameter",
+                "baseline"
+            ],
+            "title": "StaticValueKind",
+            "type": "string"
+        },
+        "VerificationSchedule": {
+            "additionalProperties": false,
+            "description": "Dates of completed and planned verification.",
+            "properties": {
+                "last_verification_date": {
+                    "description": "Completion date of the last verification.",
+                    "format": "date",
+                    "type": "string"
+                },
+                "next_verification_date": {
+                    "description": "Date of the next planned verification.",
+                    "format": "date",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "last_verification_date",
+                "next_verification_date"
+            ],
+            "title": "VerificationSchedule",
+            "type": "object"
+        }
+    },
+    "$id": "https://clevinson.github.io/cdop-mrv-pod-schema/schema/",
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "additionalProperties": true,
+    "description": "A project with its reporting context, verification schedule and monitoring scope.",
+    "metamodel_version": "1.11.0",
+    "properties": {
+        "assessment_area": {
+            "description": "Eligibility context (Assessment Area / Supersection), if applicable.",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "attestation": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/Attestation"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "description": "Optional project attestation. When present, all required Attestation fields must be supplied."
+        },
+        "id": {
+            "description": "Stable project identifier.",
+            "type": "string"
+        },
+        "methodology": {
+            "$ref": "#/$defs/Methodology",
+            "description": "The methodology governing the project, as identifier and version."
+        },
+        "monitoring": {
+            "$ref": "#/$defs/MonitoringScope",
+            "description": "Monitoring plans, static values, measurements and results for the project."
+        },
+        "reporting": {
+            "$ref": "#/$defs/ReportingContext",
+            "description": "Reporting context: periods, preparer, completion date."
+        },
+        "reporting_periods": {
+            "description": "The reporting periods for the project. Results reference one by id.",
+            "items": {
+                "$ref": "#/$defs/ReportingPeriod"
+            },
+            "type": [
+                "array",
+                "null"
+            ]
+        },
+        "verification_schedule": {
+            "$ref": "#/$defs/VerificationSchedule",
+            "description": "Key dates in the verification process."
+        }
+    },
+    "required": [
+        "id",
+        "reporting",
+        "verification_schedule",
+        "monitoring",
+        "methodology"
+    ],
+    "title": "mrv_pod",
+    "type": "object",
+    "version": "0.2.7"
+}
+

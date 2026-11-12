@@ -20,14 +20,14 @@ schema: $(JSON_SCHEMA)
 
 $(JSON_SCHEMA): $(SCHEMA) pyproject.toml uv.lock Makefile build.py
 	mkdir -p build
-	$(RUN) gen-json-schema --closed --top-class Project $(SCHEMA) | \
-	  $(RUN) python build.py json-schema $(SCHEMA) > $@
+	$(RUN) gen-json-schema --closed --top-class Project $(SCHEMA) > $@
 
 validate: schema
 	$(RUN) linkml validate $(SCHEMA)
 	$(RUN) python build.py validation-config $(SCHEMA) $(JSON_SCHEMA) $(EXAMPLES) > build/validation.yaml
 	# Pass filenames too: LinkML 1.11.1 exhausts config-only source iterators early.
 	$(RUN) linkml validate --config build/validation.yaml $(EXAMPLES)
+	$(RUN) python -m unittest discover -s tests -v
 
 docs: schema
 	$(RUN) python build.py clean-docs

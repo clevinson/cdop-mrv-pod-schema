@@ -1,43 +1,156 @@
-# Minimal required fields plus one plan, one result and a complete optional attestation.
-# Fictional values demonstrate structure, not a methodology calculation.
-methodology_reference: "CAR Forest Project Protocol v5.1"
+# Worked example instance for mrv-pod.yaml. Illustrative values only, but internally consistent.
+# Scenario: a fuel-savings project under VM0050, one 2026 reporting period. Project fuel use is
+# measured for two households; baseline fuel, the emission factor, and the non-renewable fraction
+# are static inputs. Results chain: mean project fuel -> project emissions, plus baseline emissions,
+# then net reductions. Arithmetic checks:
+#   mean project fuel = (1200 + 1300) / 2 = 1250 kg
+#   baseline emissions  = 2000 kg * 0.001747 tCO2e/kg * 0.30 = 1.0482 tCO2e
+#   project emissions   = 1250 kg * 0.001747 tCO2e/kg * 0.30 = 0.6551 tCO2e
+#   net reductions      = 1.0482 - 0.6551 = 0.3931 tCO2e
+id: "project-0001"
+methodology:
+  id: "VM0050"
+  version: "1.0"
+
 reporting:
-  reporting_period:
-    start_date: "2025-01-01"
-    end_date: "2025-12-31"
-  initial_reporting_period:
-    start_date: "2025-01-01"
-    end_date: "2025-12-31"
-  report_preparer: "Example preparer"
-  report_completion_date: "2026-01-31"
+  current_period: "period-2026"
+  initial_period: "period-2026"
+  report_preparer: "J. Rivera"
+  report_completion_date: "2027-01-20"
+
+reporting_periods:
+  - id: "period-2026"
+    label: "2026 annual"
+    date_range:
+      start_date: "2026-01-01"
+      end_date: "2026-12-31"
+    vintage:
+      start_date: "2026-01-01"
+      end_date: "2026-12-31"
+
 verification_schedule:
-  last_verification_date: "2025-06-15"
-  next_verification_date: "2026-06-15"
+  last_verification_date: "2026-03-10"
+  next_verification_date: "2027-03-10"
+
 monitoring:
-  requirement_categories_monitored: "Carbon stocks"
-  methods_used_to_monitor: "Forest inventory"
-  input_data:
-    - stem_count: 10
-  output_data:
-    - carbon_stock_tco2e: 25
-  input_variables:
-    - name: stem_count
-      unit: count
-  output_variables:
-    - name: carbon_stock_tco2e
-      unit: tCO2e
+  requirement_categories_monitored: "Emission reductions"
+  methods_used_to_monitor: "Household fuel-use surveys and metered stove use, per the methodology monitoring plan."
+
   monitoring_plans:
-    - monitoring_parameter: "Carbon stocks"
+    - id: "plan-project-fuel"
+      monitoring_parameter: "project_fuel_consumption"
+      approach_to_monitor: "Per-household project fuel use, measured each reporting period by survey and metered stove use."
+      expected_unit: "kg"
+      monitoring_frequency:
+        - "Per reporting period"
+      required_threshold:
+        - "N/A"
       source_of_data:
-        - "On-site forest inventory"
-      qa_qc_procedures: "Reconcile field records and check equipment calibration."
+        - "On-site survey"
+        - "Metered stove use"
+      qa_qc_procedures: "Survey responses reconciled against metered use; outliers reviewed before inclusion."
       purpose_of_data:
-        - "Estimate project carbon stocks"
-  monitoring_results:
-    - monitoring_parameter: "Carbon stocks"
+        - "Calculating project emissions"
+      equation_reference:
+        - "Project emissions equation"
+
+  static_values:
+    - id: "static-baseline-fuel"
+      label: "Baseline fuel use per household"
+      parameter: "baseline_fuel_consumption"
+      value: { value: 2000, unit: "kg" }
+      kind: "baseline"
+      source: "Ex-ante baseline established at validation"
+      valid_from: "2026-01-01"
+      valid_to: "2033-12-31"
+      evidence:
+        - kind: "document"
+          reference: "https://example.org/evidence/baseline-study.pdf"
+          description: "Baseline fuel-use study"
+          collected_at: "2025-10-01T00:00:00Z"
+    - id: "static-ef"
+      label: "Fuel emission factor"
+      parameter: "emission_factor"
+      value: { value: 0.001747, unit: "tCO2e/kg" }
+      kind: "methodology_default"
+      source: "Methodology default"
+    - id: "static-fnrb"
+      label: "Fraction of non-renewable biomass"
+      parameter: "fnrb"
+      value: { value: 0.30, unit: "fraction" }
+      kind: "methodology_default"
+      source: "Methodology default tool"
+      valid_from: "2026-01-01"
+      valid_to: "2028-12-31"
+
+  measurements:
+    - id: "meas-hh1-fuel"
+      plan: "plan-project-fuel"
+      timestamp: "2026-11-15T09:00:00Z"
+      value: { value: 1200, unit: "kg" }
+      source: "Household 1 survey and meter"
+      evidence:
+        - kind: "survey_response"
+          reference: "survey:2026/hh1"
+          description: "Household 1 annual fuel-use survey"
+        - kind: "sensor_stream"
+          reference: "feed:project-0001/stove/hh1"
+          description: "Metered stove-use stream, household 1"
+    - id: "meas-hh2-fuel"
+      plan: "plan-project-fuel"
+      timestamp: "2026-11-16T09:30:00Z"
+      value: { value: 1300, unit: "kg" }
+      source: "Household 2 survey and meter"
+      evidence:
+        - kind: "survey_response"
+          reference: "survey:2026/hh2"
+          description: "Household 2 annual fuel-use survey"
+
+  results:
+    - id: "result-project-fuel-mean"
+      label: "Mean project fuel use per household"
+      parameter: "project_fuel_consumption"
+      period: "period-2026"
+      inputs:
+        - { kind: "measurement", ref: "meas-hh1-fuel", variable: "fuel_hh" }
+        - { kind: "measurement", ref: "meas-hh2-fuel", variable: "fuel_hh" }
+      output: { value: 1250, unit: "kg" }
+      equation_reference: "Sample mean"
+      narrative_or_explanation: "Mean of the two household project fuel-use measurements."
+    - id: "result-baseline-emissions"
+      label: "Baseline emissions"
+      parameter: "baseline_emissions"
+      period: "period-2026"
+      inputs:
+        - { kind: "static", ref: "static-baseline-fuel", variable: "baseline_fuel" }
+        - { kind: "static", ref: "static-ef", variable: "emission_factor" }
+        - { kind: "static", ref: "static-fnrb", variable: "fnrb" }
+      output: { value: 1.0482, unit: "tCO2e" }
+      equation_reference: "Baseline emissions equation"
+    - id: "result-project-emissions"
+      label: "Project emissions"
+      parameter: "project_emissions"
+      period: "period-2026"
+      inputs:
+        - { kind: "result", ref: "result-project-fuel-mean", variable: "project_fuel" }
+        - { kind: "static", ref: "static-ef", variable: "emission_factor" }
+        - { kind: "static", ref: "static-fnrb", variable: "fnrb" }
+      output: { value: 0.6551, unit: "tCO2e" }
+      equation_reference: "Project emissions equation"
+    - id: "result-net-reduction"
+      label: "Net emission reductions"
+      parameter: "net_emission_reductions"
+      period: "period-2026"
+      inputs:
+        - { kind: "result", ref: "result-baseline-emissions", variable: "baseline_emissions" }
+        - { kind: "result", ref: "result-project-emissions", variable: "project_emissions" }
+      output: { value: 0.3931, unit: "tCO2e" }
+      equation_reference: "Net reduction equation"
+      narrative_or_explanation: "Baseline emissions minus project emissions for the period."
+
 attestation:
-  signature: "https://example.org/attestation.pdf"
-  signatory_name: "Alex Example"
-  signatory_title: "Project lead"
-  signatory_organization: "Example project proponent"
-  date: "2026-01-31"
+  signature: "https://example.org/evidence/attestation.pdf"
+  signatory_name: "M. Osei"
+  signatory_title: "Project Proponent"
+  signatory_organization: "Example Project Developer Ltd"
+  date: "2027-01-20"
